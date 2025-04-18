@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Maven
+target/
+!target/*.jar
+*.class
+*.jar
+*.war
+*.ear
+*.logs
+.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# VS Code
+.vscode/
+
+# Docker
+.docker/
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Logs
+logs/
+*.log
+
+# OS specific
+.DS_Store
+Thumbs.db
