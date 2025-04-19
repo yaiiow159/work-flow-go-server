@@ -23,7 +23,7 @@ services:
           cpus: '1'
           memory: 1G
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8081/actuator/health"]
+      test: ["CMD", "curl", "--fail", "http://localhost:8081/api/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
