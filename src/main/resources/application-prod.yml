@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://dog-d01d11fg127c73e9ehj0-a.singapore-postgres.render.com:5432/workflow_go}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://dog-d01d11fg127c73e9ehj0-a.singapore-postgres.render.com:5432/workflow_go?sslmode=require}
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:ysMgwz8z96yLG9DO6KYMWye5XTIp1xcn}
     driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.postgresql.Driver}
