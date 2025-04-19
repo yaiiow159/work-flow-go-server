@@ -1,5 +1,6 @@
 package com.workflowgo.workflowgoserver.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -18,6 +19,7 @@ public class ContactPerson {
     @NotBlank(message = "Name is required")
     private String name;
     
+    @Column(name = "contact_position")
     private String position;
     
     @Email(message = "Email should be valid")

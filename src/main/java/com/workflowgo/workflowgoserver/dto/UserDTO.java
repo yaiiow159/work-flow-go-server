@@ -25,7 +25,7 @@ public class UserDTO {
     private boolean emailNotifications;
     private String reminderTime;
     
-    private User.DisplayPreferences.DefaultView defaultView;
+    private User.Display.DefaultView defaultView;
     private boolean compactMode;
     
     public static UserDTO fromEntity(User user) {
@@ -37,13 +37,13 @@ public class UserDTO {
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
-                .darkMode(user.getThemePreferences() != null && user.getThemePreferences().isDarkMode())
-                .primaryColor(user.getThemePreferences() != null ? user.getThemePreferences().getPrimaryColor() : null)
-                .notificationsEnabled(user.getNotificationPreferences() != null && user.getNotificationPreferences().isEnabled())
-                .emailNotifications(user.getNotificationPreferences() != null && user.getNotificationPreferences().isEmailNotifications())
-                .reminderTime(user.getNotificationPreferences() != null ? user.getNotificationPreferences().getReminderTime() : null)
-                .defaultView(user.getDisplayPreferences() != null ? user.getDisplayPreferences().getDefaultView() : null)
-                .compactMode(user.getDisplayPreferences() != null && user.getDisplayPreferences().isCompactMode())
+                .darkMode(user.getPreferences() != null && user.getPreferences().getTheme() != null && user.getPreferences().getTheme().isDarkMode())
+                .primaryColor(user.getPreferences() != null && user.getPreferences().getTheme() != null ? user.getPreferences().getTheme().getPrimaryColor() : null)
+                .notificationsEnabled(user.getPreferences() != null && user.getPreferences().getNotifications() != null && user.getPreferences().getNotifications().isEnabled())
+                .emailNotifications(user.getPreferences() != null && user.getPreferences().getNotifications() != null && user.getPreferences().getNotifications().isEmailNotifications())
+                .reminderTime(user.getPreferences() != null && user.getPreferences().getNotifications() != null ? user.getPreferences().getNotifications().getReminderTime() : null)
+                .defaultView(user.getPreferences() != null && user.getPreferences().getDisplay() != null ? user.getPreferences().getDisplay().getDefaultView() : null)
+                .compactMode(user.getPreferences() != null && user.getPreferences().getDisplay() != null && user.getPreferences().getDisplay().isCompactMode())
                 .build();
     }
     
@@ -53,24 +53,29 @@ public class UserDTO {
         user.setName(this.name);
         user.setEmail(this.email);
         
-        User.ThemePreferences themePreferences = User.ThemePreferences.builder()
+        User.Theme theme = User.Theme.builder()
                 .darkMode(this.darkMode)
                 .primaryColor(this.primaryColor)
                 .build();
-        user.setThemePreferences(themePreferences);
         
-        User.NotificationPreferences notificationPreferences = User.NotificationPreferences.builder()
+        User.Notifications notifications = User.Notifications.builder()
                 .enabled(this.notificationsEnabled)
                 .emailNotifications(this.emailNotifications)
                 .reminderTime(this.reminderTime)
                 .build();
-        user.setNotificationPreferences(notificationPreferences);
         
-        User.DisplayPreferences displayPreferences = User.DisplayPreferences.builder()
+        User.Display display = User.Display.builder()
                 .defaultView(this.defaultView)
                 .compactMode(this.compactMode)
                 .build();
-        user.setDisplayPreferences(displayPreferences);
+        
+        User.Preferences preferences = User.Preferences.builder()
+                .theme(theme)
+                .notifications(notifications)
+                .display(display)
+                .build();
+        
+        user.setPreferences(preferences);
         
         return user;
     }
