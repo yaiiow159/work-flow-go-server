@@ -13,5 +13,5 @@ COPY --from=build /app/target/*.jar app.jar
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
-EXPOSE 8001
+EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app.jar"]

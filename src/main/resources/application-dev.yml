@@ -20,7 +20,7 @@ spring:
         format_sql: true
 
 server:
-  port: 8001
+  port: 8081
 
 cloudinary:
   cloud-name: dh4rfryvq

@@ -8,7 +8,7 @@ All API endpoints are relative to: `/api`
 
 ## Authentication
 
-Authentication will be implemented in a future phase. Currently, the API is designed for personal use without authentication.
+Authentication will be implemented using JWT tokens. All authenticated endpoints require a valid JWT token in the Authorization header.
 
 ## Data Models
 
@@ -62,6 +62,7 @@ export interface Interview {
   feedback: string
   createdAt: string
   updatedAt: string
+  userId: string
 }
 
 export interface User {
@@ -112,13 +113,118 @@ export interface InterviewStatistics {
 
 ## API Endpoints
 
+### Authentication
+
+#### Register New User
+
+- **URL**: `/auth/register`
+- **Method**: `POST`
+- **Description**: Register a new user with email, password, and display name
+- **Request Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "securePassword123",
+    "displayName": "User Name"
+  }
+  ```
+- **Response**: AuthResponse object with user data and JWT token
+  ```json
+  {
+    "user": {
+      "id": "user123",
+      "email": "user@example.com",
+      "displayName": "User Name",
+      "photoURL": null,
+      "authProvider": "password"
+    },
+    "token": "jwt_token_string"
+  }
+  ```
+- **Error Responses**:
+  - `400 Bad Request` - If email is already registered or validation fails
+- **Frontend Implementation**: `authStore.register(email, password, displayName)`
+- **Used in Components**: `Register.vue`
+
+#### Login with Email and Password
+
+- **URL**: `/auth/login`
+- **Method**: `POST`
+- **Description**: Authenticate user with email and password
+- **Request Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "securePassword123"
+  }
+  ```
+- **Response**: AuthResponse object with user data and JWT token
+  ```json
+  {
+    "user": {
+      "id": "user123",
+      "email": "user@example.com",
+      "displayName": "User Name",
+      "photoURL": null,
+      "authProvider": "password"
+    },
+    "token": "jwt_token_string"
+  }
+  ```
+- **Error Responses**:
+  - `401 Unauthorized` - If credentials are invalid
+- **Frontend Implementation**: `authStore.loginWithCredentials(email, password)`
+- **Used in Components**: `Login.vue`
+
+#### Google OAuth Login
+
+- **URL**: `/auth/google`
+- **Method**: `GET`
+- **Description**: Redirect to Google OAuth login page
+- **Response**: Redirects to Google authentication
+- **Frontend Implementation**: `authStore.loginWithGoogle()`
+- **Used in Components**: `Login.vue`
+
+#### Google OAuth Callback
+
+- **URL**: `/auth/google/callback`
+- **Method**: `GET`
+- **Description**: Handle Google OAuth callback
+- **Query Parameters**: `code=[string]` - Authorization code from Google
+- **Response**: AuthResponse object with user data and JWT token (or redirects with token in query parameter)
+- **Frontend Implementation**: `authService.handleGoogleCallback(code)`
+- **Used in Components**: `GoogleCallback.vue`
+
+#### Validate Token
+
+- **URL**: `/auth/validate`
+- **Method**: `GET`
+- **Description**: Validate JWT token
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**: Status 200 if token is valid
+- **Error Responses**:
+  - `401 Unauthorized` - If token is invalid or expired
+- **Frontend Implementation**: `authService.validateToken()`
+- **Used in Components**: Router guard
+
+#### Logout
+
+- **URL**: `/auth/logout`
+- **Method**: `POST`
+- **Description**: Invalidate user token
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**: Status 200
+- **Frontend Implementation**: `authStore.logout()`
+- **Used in Components**: `UserProfile.vue`
+
 ### Interviews
 
 #### Get All Interviews
 
 - **URL**: `/interviews`
 - **Method**: `GET`
-- **Description**: Retrieve all interviews
+- **Description**: Retrieve all interviews for the authenticated user
+- **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**:
   - `status?: string` - Filter by status (optional)
   - `from?: string` - Filter by date range start (optional)
@@ -135,10 +241,12 @@ export interface InterviewStatistics {
 - **URL**: `/interviews/{id}`
 - **Method**: `GET`
 - **Description**: Retrieve a specific interview by ID
+- **Headers**: `Authorization: Bearer {token}`
 - **URL Parameters**: `id=[string]` - ID of the interview
 - **Response**: Interview object
 - **Error Responses**:
   - `404 Not Found` - If interview with the specified ID does not exist
+  - `403 Forbidden` - If interview does not belong to the authenticated user
 - **Frontend Implementation**: `interviewsApi.getById(id)`
 - **Used in Components**: `InterviewDetail.vue`, `InterviewForm.vue` (edit mode)
 
@@ -147,8 +255,9 @@ export interface InterviewStatistics {
 - **URL**: `/interviews`
 - **Method**: `POST`
 - **Description**: Create a new interview
-- **Request Body**: Interview object (without id, createdAt, and updatedAt)
-- **Response**: Created interview object with id, createdAt, and updatedAt
+- **Headers**: `Authorization: Bearer {token}`
+- **Request Body**: Interview object (without id, createdAt, updatedAt, and userId)
+- **Response**: Created interview object with id, createdAt, updatedAt, and userId
 - **Error Responses**:
   - `400 Bad Request` - If required fields are missing or invalid
 - **Frontend Implementation**: `interviewsApi.create(interview)`
@@ -159,11 +268,13 @@ export interface InterviewStatistics {
 - **URL**: `/interviews/{id}`
 - **Method**: `PUT`
 - **Description**: Update an existing interview
+- **Headers**: `Authorization: Bearer {token}`
 - **URL Parameters**: `id=[string]` - ID of the interview to update
 - **Request Body**: Interview object (partial updates allowed)
 - **Response**: Updated interview object
 - **Error Responses**:
   - `404 Not Found` - If interview with the specified ID does not exist
+  - `403 Forbidden` - If interview does not belong to the authenticated user
   - `400 Bad Request` - If required fields are missing or invalid
 - **Frontend Implementation**: `interviewsApi.update(id, interview)`
 - **Used in Components**: `InterviewForm.vue` (edit mode)
@@ -173,6 +284,7 @@ export interface InterviewStatistics {
 - **URL**: `/interviews/{id}/status`
 - **Method**: `PATCH`
 - **Description**: Update only the status of an interview
+- **Headers**: `Authorization: Bearer {token}`
 - **URL Parameters**: `id=[string]` - ID of the interview
 - **Request Body**: 
   ```json
@@ -183,6 +295,7 @@ export interface InterviewStatistics {
 - **Response**: Updated interview object
 - **Error Responses**:
   - `404 Not Found` - If interview with the specified ID does not exist
+  - `403 Forbidden` - If interview does not belong to the authenticated user
   - `400 Bad Request` - If status is invalid
 - **Frontend Implementation**: `interviewsApi.updateStatus(id, status)`
 - **Used in Components**: `InterviewDetail.vue`
@@ -192,10 +305,12 @@ export interface InterviewStatistics {
 - **URL**: `/interviews/{id}`
 - **Method**: `DELETE`
 - **Description**: Delete an interview
+- **Headers**: `Authorization: Bearer {token}`
 - **URL Parameters**: `id=[string]` - ID of the interview to delete
 - **Response**: Status 204 (No Content)
 - **Error Responses**:
   - `404 Not Found` - If interview with the specified ID does not exist
+  - `403 Forbidden` - If interview does not belong to the authenticated user
 - **Frontend Implementation**: `interviewsApi.delete(id)`
 - **Used in Components**: `Interviews.vue`, `InterviewDetail.vue`
 
@@ -205,7 +320,8 @@ export interface InterviewStatistics {
 
 - **URL**: `/documents`
 - **Method**: `GET`
-- **Description**: Retrieve all documents
+- **Description**: Retrieve all documents for the authenticated user
+- **Headers**: `Authorization: Bearer {token}`
 - **Response**: Array of Document objects
 - **Frontend Implementation**: `documentsApi.getAll()`
 - **Used in Components**: `Documents.vue`
@@ -215,6 +331,7 @@ export interface InterviewStatistics {
 - **URL**: `/documents`
 - **Method**: `POST`
 - **Description**: Upload a new document
+- **Headers**: `Authorization: Bearer {token}`
 - **Request Body**: Multipart form data with:
   - `file` - The document file
   - `name` - Document name
@@ -231,10 +348,12 @@ export interface InterviewStatistics {
 - **URL**: `/documents/{id}`
 - **Method**: `GET`
 - **Description**: Get document metadata by ID
+- **Headers**: `Authorization: Bearer {token}`
 - **URL Parameters**: `id=[string]` - ID of the document
 - **Response**: Document object
 - **Error Responses**:
   - `404 Not Found` - If document with the specified ID does not exist
+  - `403 Forbidden` - If document does not belong to the authenticated user
 - **Frontend Implementation**: `documentsApi.getById(id)`
 - **Used in Components**: `Documents.vue`
 
@@ -243,10 +362,12 @@ export interface InterviewStatistics {
 - **URL**: `/documents/{id}`
 - **Method**: `DELETE`
 - **Description**: Delete a document
+- **Headers**: `Authorization: Bearer {token}`
 - **URL Parameters**: `id=[string]` - ID of the document to delete
 - **Response**: Status 204 (No Content)
 - **Error Responses**:
   - `404 Not Found` - If document with the specified ID does not exist
+  - `403 Forbidden` - If document does not belong to the authenticated user
 - **Frontend Implementation**: `documentsApi.delete(id)`
 - **Used in Components**: `Documents.vue`, `InterviewForm.vue`
 
@@ -257,7 +378,8 @@ export interface InterviewStatistics {
 - **URL**: `/user/settings`
 - **Method**: `GET`
 - **Description**: Retrieve the current user's settings
-- **Response**: User object
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**: UserSettings object
 - **Frontend Implementation**: `userSettingsApi.get()`
 - **Used in Components**: `Settings.vue`
 
@@ -266,11 +388,10 @@ export interface InterviewStatistics {
 - **URL**: `/user/settings`
 - **Method**: `PUT`
 - **Description**: Update the current user's settings
-- **Request Body**: Partial User object
+- **Headers**: `Authorization: Bearer {token}`
+- **Request Body**: Partial UserSettings object
   ```json
   {
-    "name": "User Name",
-    "email": "user@example.com",
     "preferences": {
       "theme": {
         "darkMode": true,
@@ -288,7 +409,7 @@ export interface InterviewStatistics {
     }
   }
   ```
-- **Response**: Updated User object
+- **Response**: Updated UserSettings object
 - **Error Responses**:
   - `400 Bad Request` - If required fields are missing or invalid
 - **Frontend Implementation**: `userSettingsApi.update(settings)`
@@ -299,7 +420,8 @@ export interface InterviewStatistics {
 - **URL**: `/user/settings/reset`
 - **Method**: `POST`
 - **Description**: Reset user settings to default values
-- **Response**: User object with default settings
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**: UserSettings object with default settings
 - **Frontend Implementation**: `userSettingsApi.resetSettings()`
 - **Used in Components**: `Settings.vue`
 
@@ -308,6 +430,7 @@ export interface InterviewStatistics {
 - **URL**: `/user/export`
 - **Method**: `GET`
 - **Description**: Export all user data (interviews, documents, settings)
+- **Headers**: `Authorization: Bearer {token}`
 - **Response**: Binary file (JSON format)
 - **Frontend Implementation**: `userSettingsApi.exportData()`
 - **Used in Components**: `Settings.vue`
@@ -318,7 +441,8 @@ export interface InterviewStatistics {
 
 - **URL**: `/statistics/interviews`
 - **Method**: `GET`
-- **Description**: Get interview statistics
+- **Description**: Get interview statistics for the authenticated user
+- **Headers**: `Authorization: Bearer {token}`
 - **Query Parameters**:
   - `from?: string` - Filter by date range start (optional)
   - `to?: string` - Filter by date range end (optional)
@@ -350,6 +474,22 @@ export interface InterviewStatistics {
 - **Used in Components**: `Home.vue`
 
 ## Component-Specific Data Requirements
+
+### Login.vue
+- Requires authentication functionality for email/password and Google login
+- Uses: `authStore.loginWithCredentials(email, password)`, `authStore.loginWithGoogle()`
+
+### Register.vue
+- Requires user registration functionality
+- Uses: `authStore.register(email, password, displayName)`
+
+### GoogleCallback.vue
+- Handles Google OAuth callback
+- Uses: `authService.handleGoogleCallback(code)`
+
+### UserProfile.vue
+- Displays current user information and logout functionality
+- Uses: `authStore.user`, `authStore.logout()`
 
 ### Home.vue
 - Requires interview statistics data
@@ -385,10 +525,12 @@ export interface InterviewStatistics {
 
 ## Implementation Notes
 
-1. All mock data should be replaced with actual API calls to the backend.
-2. The backend should implement all endpoints described in this document.
-3. Error handling should be consistent across all endpoints.
-4. For file uploads, consider implementing progress indicators and file size limits.
-5. User settings should be persisted in the backend database.
-6. Consider implementing caching strategies for frequently accessed data like user settings.
-7. Ensure proper validation of all input data both on the frontend and backend.
+1. All API endpoints require authentication except for `/auth/login`, `/auth/register`, and `/auth/google`.
+2. JWT tokens should be included in the `Authorization` header as `Bearer {token}`.
+3. The backend should validate the token for each authenticated request.
+4. User data should be associated with the authenticated user's ID.
+5. Error handling should be consistent across all endpoints.
+6. For file uploads, consider implementing progress indicators and file size limits.
+7. Environment-specific configuration should be managed through environment variables.
+8. Ensure proper validation of all input data both on the frontend and backend.
+9. Consider implementing refresh tokens for better security.

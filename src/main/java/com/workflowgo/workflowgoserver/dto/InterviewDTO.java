@@ -38,4 +38,5 @@ public class InterviewDTO {
     private String feedback;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private UUID userId;
 }

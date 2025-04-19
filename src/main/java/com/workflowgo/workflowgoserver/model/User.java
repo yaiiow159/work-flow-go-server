@@ -32,21 +32,37 @@ public class User {
     @Column(unique = true)
     private String email;
     
-    @Embedded
-    private ThemePreferences themePreferences;
+    private String password;
+    
+    private String googleId;
+    
+    private String photoUrl;
     
     @Embedded
-    private NotificationPreferences notificationPreferences;
-    
-    @Embedded
-    private DisplayPreferences displayPreferences;
+    private Preferences preferences;
     
     @Data
     @Embeddable
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ThemePreferences {
+    public static class Preferences {
+        @Embedded
+        private Theme theme;
+        
+        @Embedded
+        private Notifications notifications;
+        
+        @Embedded
+        private Display display;
+    }
+    
+    @Data
+    @Embeddable
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Theme {
         private boolean darkMode;
         private String primaryColor;
     }
@@ -56,7 +72,7 @@ public class User {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class NotificationPreferences {
+    public static class Notifications {
         private boolean enabled;
         private boolean emailNotifications;
         private String reminderTime;
@@ -67,7 +83,7 @@ public class User {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class DisplayPreferences {
+    public static class Display {
         @Enumerated(EnumType.STRING)
         private DefaultView defaultView;
         private boolean compactMode;

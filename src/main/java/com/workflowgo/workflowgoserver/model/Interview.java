@@ -79,6 +79,9 @@ public class Interview {
     
     private LocalDateTime updatedAt;
     
+    @NotNull(message = "User ID is required")
+    private UUID userId;
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

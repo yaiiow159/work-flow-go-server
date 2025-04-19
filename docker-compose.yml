@@ -3,13 +3,14 @@ version: '3.8'
 services:
   app:
     build: .
-    container_name: workflowgo-app
+    container_name: workflow-go-server
     ports:
-      - "8001:8001"
+      - "8081:8081"
     depends_on:
       postgres:
         condition: service_healthy
     environment:
+      - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/workflowgodb
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
