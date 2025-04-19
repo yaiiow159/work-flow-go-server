@@ -10,8 +10,6 @@ spring:
       minimum-idle: 10
       idle-timeout: 300000
       max-lifetime: 1200000
-  profiles:
-    include: actuator
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -33,7 +31,7 @@ spring:
               - profile
 
 server:
-  port: ${SERVER_PORT:8001}
+  port: ${SERVER_PORT:8081}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
