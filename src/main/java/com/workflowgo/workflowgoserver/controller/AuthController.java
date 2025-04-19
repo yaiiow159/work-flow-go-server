@@ -44,6 +44,11 @@ public class AuthController {
     public ResponseEntity<String> validateToken() {
         log.debug("Token validation request received");
         boolean isValid = authService.validateToken();
+
+        if (!isValid) {
+            return ResponseEntity.status(401).body("Token is invalid");
+        }
+
         return ResponseEntity.ok("Token is valid");
     }
     
