@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:postgres://root:ysMgwz8z96yLG9DO6KYMWye5XTIp1xcn@dog-d01d11fg127c73e9ehj0-a.singapore-postgres.render.com/workflow_go}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://dpg-d01d11fgi27c73e9ohj0-a.singapore-postgresql.render.com:5432/workflow_go}
     username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:ysMgwz8z96yLG9DO6KYMWye5XTIp1xcn}
+    password: ${SPRING_DATASOURCE_PASSWORD:yxWgwz8z9GyLQ9DD0KYRWye5XTIp1xcn}
     driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.postgresql.Driver}
     hikari:
       connection-timeout: 30000
@@ -25,7 +25,7 @@ spring:
           google:
             client-id: ${SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID:568f84172230-nspmfd7nfwsfr7ph2m4gmgp0oev9i.apps.googleusercontent.com}
             client-secret: ${SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET: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}
-            redirect-uri: ${SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI:https://workflow-go.com/api/oauth2/callback/google}
+            redirect-uri: ${SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI:https://work-flow-go-server.onrender.com/oauth2/callback/google}
             scope:
               - email
               - profile
