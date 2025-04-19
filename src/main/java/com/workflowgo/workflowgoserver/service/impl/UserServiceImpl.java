@@ -1,11 +1,9 @@
 package com.workflowgo.workflowgoserver.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.workflowgo.workflowgoserver.dto.UserDTO;
 import com.workflowgo.workflowgoserver.exception.ResourceNotFoundException;
 import com.workflowgo.workflowgoserver.model.User;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
-import com.workflowgo.workflowgoserver.security.JwtTokenUtil;
 import com.workflowgo.workflowgoserver.service.DocumentService;
 import com.workflowgo.workflowgoserver.service.InterviewService;
 import com.workflowgo.workflowgoserver.service.UserService;
