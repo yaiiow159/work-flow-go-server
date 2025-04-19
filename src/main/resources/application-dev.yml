@@ -18,17 +18,35 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:your-client-id-here}
+            client-secret: ${GOOGLE_CLIENT_SECRET:your-client-secret-here}
 
 server:
   port: 8081
-
-cloudinary:
-  cloud-name: dh4rfryvq
-  api-key: 273528986331944
-  api-secret: FOqHrApkNVQTlmhBEUYBsrL4zE
-  secure: true
+  servlet:
+    context-path: /api
 
 logging:
   level:
     org.springframework: INFO
     com.workflowgo: DEBUG
+    org.hibernate.SQL: DEBUG
+
+app:
+  auth:
+    tokenSecret: ${JWT_SECRET:bd04b7c89bfd96a0f14a997f58f2246c37883f3825dd1a3f3d636f9fb0d386a0}
+    tokenExpirationMsec: ${JWT_EXPIRATION:864000000}
+    authorizedRedirectUris: ${OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/redirect}
+  cors:
+    allowedOrigins: ${ALLOWED_ORIGINS:http://localhost:3000}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:dh4rfryvq}
+  api-key: ${CLOUDINARY_API_KEY:273528986331944}
+  api-secret: ${CLOUDINARY_API_SECRET:FOqHrApkNVQTlmhBEUYBsrL4zE}
+  secure: true

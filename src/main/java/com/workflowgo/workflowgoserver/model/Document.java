@@ -2,54 +2,51 @@ package com.workflowgo.workflowgoserver.model;
 
 import com.workflowgo.workflowgoserver.model.enums.DocumentType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.Set;
 
+@Entity
+@Table(name = "documents")
 @Getter
 @Setter
 @ToString
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "documents")
 public class Document {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
-    @NotBlank(message = "Document name is required")
+    @Column(nullable = false)
     private String name;
     
-    @NotNull(message = "Document type is required")
     @Enumerated(EnumType.STRING)
     private DocumentType type;
     
-    @NotBlank(message = "Document URL is required")
+    @Column(nullable = false)
     private String url;
     
     private String contentType;
     
     private Long size;
     
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
+    @CreationTimestamp
+    private ZonedDateTime createdAt;
     
-    @ManyToOne
-    @JoinColumn(name = "interview_id")
-    private Interview interview;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
+    private User user;
     
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
+    @ManyToMany(mappedBy = "documents")
+    @ToString.Exclude
+    private Set<Interview> interviews = new HashSet<>();
 
     @Override
     public final boolean equals(Object o) {

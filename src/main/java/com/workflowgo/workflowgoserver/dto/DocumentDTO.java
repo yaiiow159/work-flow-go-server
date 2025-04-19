@@ -2,39 +2,42 @@ package com.workflowgo.workflowgoserver.dto;
 
 import com.workflowgo.workflowgoserver.model.Document;
 import com.workflowgo.workflowgoserver.model.enums.DocumentType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class DocumentDTO {
-    
-    private UUID id;
+    private Long id;
     private String name;
     private DocumentType type;
     private String url;
     private String contentType;
     private Long size;
-    private LocalDateTime createdAt;
-    private UUID interviewId;
+    private ZonedDateTime createdAt;
     
-    public static DocumentDTO fromEntity(Document document) {
-        return DocumentDTO.builder()
-                .id(document.getId())
-                .name(document.getName())
-                .type(document.getType())
-                .url(document.getUrl())
-                .contentType(document.getContentType())
-                .size(document.getSize())
-                .createdAt(document.getCreatedAt())
-                .interviewId(document.getInterview() != null ? document.getInterview().getId() : null)
-                .build();
+    public static DocumentDTO fromDocument(Document document) {
+        if (document == null) {
+            return null;
+        }
+        
+        DocumentDTO dto = new DocumentDTO();
+        dto.setId(document.getId());
+        dto.setName(document.getName());
+        dto.setType(document.getType());
+        dto.setUrl(document.getUrl());
+        dto.setContentType(document.getContentType());
+        dto.setSize(document.getSize());
+        dto.setCreatedAt(document.getCreatedAt());
+        
+        return dto;
+    }
+    
+    public static List<DocumentDTO> fromDocuments(List<Document> documents) {
+        return documents.stream()
+                .map(DocumentDTO::fromDocument)
+                .collect(Collectors.toList());
     }
 }

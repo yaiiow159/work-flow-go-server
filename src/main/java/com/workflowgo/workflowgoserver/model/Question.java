@@ -2,32 +2,27 @@ package com.workflowgo.workflowgoserver.model;
 
 import com.workflowgo.workflowgoserver.model.enums.QuestionCategory;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
-import java.util.UUID;
 
+@Entity
+@Table(name = "questions")
 @Getter
 @Setter
 @ToString
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "questions")
 public class Question {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
-    @NotBlank(message = "Question text is required")
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, length = 1000)
     private String question;
     
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 2000)
     private String answer;
     
     @Enumerated(EnumType.STRING)
@@ -35,8 +30,9 @@ public class Question {
     
     private boolean isImportant;
     
-    @ManyToOne
-    @JoinColumn(name = "interview_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "interview_id", nullable = false)
+    @ToString.Exclude
     private Interview interview;
 
     @Override

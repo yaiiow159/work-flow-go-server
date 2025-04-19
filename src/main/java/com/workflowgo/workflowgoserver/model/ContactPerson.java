@@ -2,28 +2,20 @@ package com.workflowgo.workflowgoserver.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Embeddable
+@Data
 public class ContactPerson {
-    
-    @NotBlank(message = "Name is required")
+    @Column(name = "contact_name")
     private String name;
     
     @Column(name = "contact_position")
     private String position;
     
-    @Email(message = "Email should be valid")
+    @Column(name = "contact_email")
     private String email;
     
+    @Column(name = "contact_phone")
     private String phone;
 }

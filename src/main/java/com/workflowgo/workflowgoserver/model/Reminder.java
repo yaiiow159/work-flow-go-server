@@ -1,38 +1,33 @@
 package com.workflowgo.workflowgoserver.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Objects;
-import java.util.UUID;
 
+@Entity
+@Table(name = "reminders")
 @Getter
 @Setter
 @ToString
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "reminders")
 public class Reminder {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interview_id", nullable = false)
+    @ToString.Exclude
     private Interview interview;
     
-    @NotNull(message = "Reminder time is required")
-    private LocalDateTime time;
+    @Column(nullable = false)
+    private ZonedDateTime time;
     
-    @NotBlank(message = "Message is required")
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false)
     private String message;
     
     private boolean isCompleted;

@@ -1,97 +1,56 @@
 package com.workflowgo.workflowgoserver.model;
 
+import com.workflowgo.workflowgoserver.model.enums.AuthProvider;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.util.HashSet;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.Set;
 
+@Entity
+@Table(name = "users", uniqueConstraints = {
+    @UniqueConstraint(columnNames = "email")
+})
 @Getter
 @Setter
 @ToString
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "users")
 public class User {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
-    @NotBlank(message = "Name is required")
+    @Column(nullable = false)
     private String name;
     
-    @Email(message = "Email should be valid")
-    @NotBlank(message = "Email is required")
-    @Column(unique = true)
+    @Column(nullable = false)
     private String email;
+    
+    private String imageUrl;
+    
+    @Column(nullable = false)
+    private Boolean emailVerified = false;
     
     private String password;
     
-    private String googleId;
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider;
     
-    private String photoUrl;
-    
+    private String providerId;
+
     @Embedded
-    private Preferences preferences;
+    private UserPreferences preferences = new UserPreferences();
     
-    @Data
-    @Embeddable
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Preferences {
-        @Embedded
-        private Theme theme;
-        
-        @Embedded
-        private Notifications notifications;
-        
-        @Embedded
-        private Display display;
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<Interview> interviews = new HashSet<>();
     
-    @Data
-    @Embeddable
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Theme {
-        private boolean darkMode;
-        private String primaryColor;
-    }
-    
-    @Data
-    @Embeddable
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Notifications {
-        private boolean enabled;
-        private boolean emailNotifications;
-        private String reminderTime;
-    }
-    
-    @Data
-    @Embeddable
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Display {
-        @Enumerated(EnumType.STRING)
-        private DefaultView defaultView;
-        private boolean compactMode;
-        
-        public enum DefaultView {
-            CALENDAR,
-            LIST
-        }
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<Document> documents = new HashSet<>();
 
     @Override
     public final boolean equals(Object o) {

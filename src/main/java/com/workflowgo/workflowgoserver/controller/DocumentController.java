@@ -1,80 +1,139 @@
 package com.workflowgo.workflowgoserver.controller;
 
 import com.workflowgo.workflowgoserver.dto.DocumentDTO;
-import com.workflowgo.workflowgoserver.model.enums.DocumentType;
+import com.workflowgo.workflowgoserver.model.Document;
+import com.workflowgo.workflowgoserver.payload.ApiResponse;
+import com.workflowgo.workflowgoserver.security.CurrentUser;
+import com.workflowgo.workflowgoserver.security.UserPrincipal;
 import com.workflowgo.workflowgoserver.service.DocumentService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.List;
-import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/documents")
-@RequiredArgsConstructor
-@Slf4j
-@Tag(name = "Documents", description = "Document management endpoints")
 public class DocumentController {
-    
+
     private final DocumentService documentService;
-    
+
+    public DocumentController(DocumentService documentService) {
+        this.documentService = documentService;
+    }
+
     @GetMapping
-    @Operation(summary = "Get all documents", description = "Retrieve all documents")
-    public ResponseEntity<List<DocumentDTO>> getAllDocuments(
-            @RequestParam(value = "interviewId", required = false) UUID interviewId,
-            @RequestParam(value = "userId", required = false) UUID userId) {
+    @PreAuthorize("hasRole('USER')")
+    public List<DocumentDTO> getAllDocuments(@CurrentUser UserPrincipal currentUser) {
+        List<Document> documents = documentService.getAllDocumentsByUser(currentUser.getId());
+        return DocumentDTO.fromDocuments(documents);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> uploadDocument(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("name") String name,
+            @RequestParam("type") String type,
+            @CurrentUser UserPrincipal currentUser) {
         
-        List<DocumentDTO> documentDTOs;
-        if (interviewId != null) {
-            log.debug("Fetching documents for interview ID: {}", interviewId);
-            documentDTOs = documentService.getDocumentsByInterviewId(interviewId);
-        } else if (userId != null) {
-            log.debug("Fetching documents for user ID: {}", userId);
-            documentDTOs = documentService.getDocumentsByUserId(userId);
-        } else {
-            log.debug("Fetching all documents");
-            documentDTOs = documentService.getAllDocuments();
-        }
-        
-        return ResponseEntity.ok(documentDTOs);
+        Document document = documentService.storeDocument(file, name, type, currentUser.getId());
+        DocumentDTO documentDTO = DocumentDTO.fromDocument(document);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{id}")
+                .buildAndExpand(document.getId()).toUri();
+
+        return ResponseEntity.created(location)
+                .body(documentDTO);
     }
     
     @GetMapping("/{id}")
-    @Operation(summary = "Get document by ID", description = "Get document metadata by ID")
-    public ResponseEntity<DocumentDTO> getDocumentById(@PathVariable UUID id) {
-        log.debug("Fetching document with ID: {}", id);
-        DocumentDTO documentDTO = documentService.getDocumentById(id);
-        return ResponseEntity.ok(documentDTO);
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<DocumentDTO> getDocument(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
+        Document document = documentService.getDocumentById(id, currentUser.getId());
+        return ResponseEntity.ok(DocumentDTO.fromDocument(document));
     }
     
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Upload document", description = "Upload a new document")
-    public ResponseEntity<DocumentDTO> uploadDocument(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("name") String name,
-            @RequestParam("type") DocumentType type,
-            @RequestParam(value = "interviewId", required = false) UUID interviewId,
-            @RequestParam(value = "userId", required = false) UUID userId) {
+    @GetMapping("/{id}/download")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Resource> downloadDocument(@PathVariable Long id, @CurrentUser UserPrincipal currentUser, HttpServletRequest request) throws IOException {
+        Resource resource = documentService.loadDocumentAsResource(id, currentUser.getId());
         
-        log.debug("Uploading document: {}, type: {}, interviewId: {}, userId: {}", 
-                name, type, interviewId, userId);
+        String contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
         
-        DocumentDTO uploadedDocument = documentService.uploadDocument(file, name, type, interviewId, userId);
-        return new ResponseEntity<>(uploadedDocument, HttpStatus.CREATED);
+        if(contentType == null) {
+            contentType = "application/octet-stream";
+        }
+        
+        Document document = documentService.getDocumentById(id, currentUser.getId());
+        
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getName() + "\"")
+                .body(resource);
     }
     
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete document", description = "Delete a document")
-    public ResponseEntity<Void> deleteDocument(@PathVariable UUID id) {
-        log.debug("Deleting document with ID: {}", id);
-        documentService.deleteDocument(id);
-        return ResponseEntity.noContent().build();
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> deleteDocument(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
+        documentService.deleteDocument(id, currentUser.getId());
+        return ResponseEntity.ok(new ApiResponse(true, "Document deleted successfully"));
+    }
+    
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<DocumentDTO> updateDocument(
+            @PathVariable Long id,
+            @RequestParam("name") String name,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @CurrentUser UserPrincipal currentUser) {
+        
+        Document document = documentService.updateDocument(id, name, file, currentUser.getId());
+        return ResponseEntity.ok(DocumentDTO.fromDocument(document));
+    }
+    
+    @GetMapping("/count")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Long> getDocumentCount(@CurrentUser UserPrincipal currentUser) {
+        long count = documentService.getDocumentCount(currentUser.getId());
+        return ResponseEntity.ok(count);
+    }
+    
+    @GetMapping("/{id}/view")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Resource> viewDocument(
+            @PathVariable Long id,
+            @CurrentUser UserPrincipal currentUser,
+            HttpServletRequest request) {
+        
+        Resource resource = documentService.loadDocumentAsResource(id, currentUser.getId());
+
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (IOException ex) {
+            log.error("Failed to determine file type", ex);
+            contentType = "application/octet-stream";
+        }
+
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline", "filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
     }
 }

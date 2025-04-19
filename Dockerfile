@@ -1,17 +1,25 @@
-FROM maven:3.9-eclipse-temurin-21-alpine AS build
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
+
+COPY mvnw .
+COPY .mvn .mvn
 COPY pom.xml .
-RUN mvn dependency:go-offline
 
-COPY src/ /app/src/
-RUN mvn package -DskipTests
+RUN chmod +x ./mvnw
 
-FROM eclipse-temurin:21-jre-alpine
+RUN ./mvnw dependency:go-offline -B
+
+COPY src src
+
+RUN ./mvnw package -DskipTests
+
+FROM eclipse-temurin:21-jre
 WORKDIR /app
+
 COPY --from=build /app/target/*.jar app.jar
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
+ENV SPRING_PROFILES_ACTIVE=prod
 
 EXPOSE 8081
+
 ENTRYPOINT ["java", "-jar", "app.jar"]

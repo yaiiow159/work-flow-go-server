@@ -1,28 +1,19 @@
 package com.workflowgo.workflowgoserver.dto;
 
-import com.workflowgo.workflowgoserver.model.ContactPerson;
-import com.workflowgo.workflowgoserver.model.Document;
-import com.workflowgo.workflowgoserver.model.Question;
+import com.workflowgo.workflowgoserver.model.Interview;
 import com.workflowgo.workflowgoserver.model.enums.InterviewStatus;
 import com.workflowgo.workflowgoserver.model.enums.InterviewType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class InterviewDTO {
-    
-    private UUID id;
+    private Long id;
     private String companyName;
     private String position;
     private LocalDate date;
@@ -31,12 +22,53 @@ public class InterviewDTO {
     private InterviewStatus status;
     private String location;
     private String notes;
-    private ContactPerson contactPerson;
-    private List<Question> questions;
-    private List<Document> documents;
+    private ContactPersonDTO contactPerson;
     private Integer rating;
     private String feedback;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private UUID userId;
+    private ZonedDateTime createdAt;
+    private ZonedDateTime updatedAt;
+    private List<QuestionDTO> questions;
+    private List<Long> documentIds;
+    
+    public static InterviewDTO fromInterview(Interview interview) {
+        InterviewDTO dto = new InterviewDTO();
+        dto.setId(interview.getId());
+        dto.setCompanyName(interview.getCompanyName());
+        dto.setPosition(interview.getPosition());
+        dto.setDate(interview.getDate());
+        dto.setTime(interview.getTime());
+        dto.setType(interview.getType());
+        dto.setStatus(interview.getStatus());
+        dto.setLocation(interview.getLocation());
+        dto.setNotes(interview.getNotes());
+        
+        if (interview.getContactPerson() != null) {
+            dto.setContactPerson(ContactPersonDTO.fromContactPerson(interview.getContactPerson()));
+        }
+        
+        dto.setRating(interview.getRating());
+        dto.setFeedback(interview.getFeedback());
+        dto.setCreatedAt(interview.getCreatedAt());
+        dto.setUpdatedAt(interview.getUpdatedAt());
+        
+        if (interview.getQuestions() != null) {
+            dto.setQuestions(interview.getQuestions().stream()
+                    .map(QuestionDTO::fromQuestion)
+                    .collect(Collectors.toList()));
+        }
+        
+        if (interview.getDocuments() != null) {
+            dto.setDocumentIds(interview.getDocuments().stream()
+                    .map(doc -> doc.getId())
+                    .collect(Collectors.toList()));
+        }
+        
+        return dto;
+    }
+    
+    public static List<InterviewDTO> fromInterviews(List<Interview> interviews) {
+        return interviews.stream()
+                .map(InterviewDTO::fromInterview)
+                .collect(Collectors.toList());
+    }
 }
