@@ -4,6 +4,7 @@ import com.google.api.client.util.Base64;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
 import com.workflowgo.workflowgoserver.config.AppProperties;
+import com.workflowgo.workflowgoserver.model.Interview;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 @Service
@@ -24,6 +26,8 @@ public class EmailService {
 
     private final Gmail gmail;
     private final AppProperties appProperties;
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     public EmailService(Gmail gmail, AppProperties appProperties) {
         this.gmail = gmail;
@@ -49,6 +53,156 @@ public class EmailService {
             log.error("Failed to send verification email to: {}", to, e);
             throw new RuntimeException("Failed to send verification email", e);
         }
+    }
+    
+    @Async("taskExecutor")
+    public void sendInterviewUpdateNotification(String to, Interview interview, String changeType) {
+        try {
+            log.info("Preparing to send interview update notification to: {}", to);
+            String subject = "WorkflowGo - Interview Update: " + interview.getCompanyName();
+            String textBody = createInterviewUpdateTextEmail(interview, changeType);
+            String htmlBody = createInterviewUpdateHtmlEmail(interview, changeType);
+            
+            sendEmail(to, subject, textBody, htmlBody);
+            log.info("Interview update notification sent successfully to: {}", to);
+        } catch (Exception e) {
+            log.error("Failed to send interview update notification to: {}", to, e);
+        }
+    }
+
+    private String createInterviewUpdateTextEmail(Interview interview, String changeType) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("WorkflowGo - Interview Update\n\n");
+        sb.append("Hello,\n\n");
+        
+        switch (changeType) {
+            case "created":
+                sb.append("A new interview has been added to your WorkflowGo account.\n\n");
+                break;
+            case "updated":
+                sb.append("An interview in your WorkflowGo account has been updated.\n\n");
+                break;
+            case "deleted":
+                sb.append("An interview in your WorkflowGo account has been deleted.\n\n");
+                break;
+            case "status_changed":
+                sb.append("The status of an interview in your WorkflowGo account has been changed to ")
+                  .append(interview.getStatus()).append(".\n\n");
+                break;
+        }
+        
+        if (!changeType.equals("deleted")) {
+            sb.append("Interview Details:\n");
+            sb.append("Company: ").append(interview.getCompanyName()).append("\n");
+            sb.append("Position: ").append(interview.getPosition()).append("\n");
+            sb.append("Date: ").append(interview.getDate().format(DATE_FORMATTER)).append("\n");
+            sb.append("Time: ").append(interview.getTime().format(TIME_FORMATTER)).append("\n");
+            sb.append("Type: ").append(interview.getType()).append("\n");
+            sb.append("Status: ").append(interview.getStatus()).append("\n");
+            
+            if (interview.getLocation() != null && !interview.getLocation().isEmpty()) {
+                sb.append("Location: ").append(interview.getLocation()).append("\n");
+            }
+        }
+        
+        sb.append("\nYou can view more details by logging into your WorkflowGo account.\n\n");
+        sb.append("This is an automated message, please do not reply to this email.\n");
+        sb.append("© ").append(java.time.Year.now().getValue()).append(" WorkflowGo. All rights reserved.");
+        
+        return sb.toString();
+    }
+    
+    private String createInterviewUpdateHtmlEmail(Interview interview, String changeType) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<!DOCTYPE html>")
+          .append("<html>")
+          .append("<head>")
+          .append("<meta charset=\"UTF-8\">")
+          .append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">")
+          .append("<title>Interview Update</title>")
+          .append("<style>")
+          .append("body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }")
+          .append(".container { border: 1px solid #ddd; border-radius: 5px; padding: 20px; }")
+          .append(".header { text-align: center; padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 20px; }")
+          .append(".details { background-color: #f9f9f9; padding: 15px; border-radius: 4px; margin: 15px 0; }")
+          .append(".status { display: inline-block; padding: 5px 10px; border-radius: 3px; font-weight: bold; color: white; background-color: ");
+
+        if (interview.getStatus() != null) {
+            switch (interview.getStatus()) {
+                case SCHEDULED:
+                    sb.append("#4f46e5");
+                    break;
+                case COMPLETED:
+                    sb.append("#10b981");
+                    break;
+                case CANCELLED:
+                    sb.append("#ef4444");
+                    break;
+                case CONFIRMED:
+                    sb.append("#f59e0b");
+                default:
+                    sb.append("#f59e0b");
+                    break;
+            }
+        } else {
+            sb.append("#6b7280");
+        }
+        
+        sb.append("; }")
+          .append(".footer { font-size: 12px; color: #777; text-align: center; margin-top: 30px; padding-top: 10px; border-top: 1px solid #eee; }")
+          .append("</style>")
+          .append("</head>")
+          .append("<body>")
+          .append("<div class=\"container\">")
+          .append("<div class=\"header\"><h2>WorkflowGo Interview Update</h2></div>")
+          .append("<p>Hello,</p>");
+        
+        switch (changeType) {
+            case "created":
+                sb.append("<p>A new interview has been added to your WorkflowGo account.</p>");
+                break;
+            case "updated":
+                sb.append("<p>An interview in your WorkflowGo account has been updated.</p>");
+                break;
+            case "deleted":
+                sb.append("<p>An interview in your WorkflowGo account has been deleted.</p>");
+                break;
+            case "status_changed":
+                sb.append("<p>The status of an interview in your WorkflowGo account has been changed to <strong>")
+                  .append(interview.getStatus()).append("</strong>.</p>");
+                break;
+        }
+        
+        if (!changeType.equals("deleted")) {
+            sb.append("<div class=\"details\">")
+              .append("<h3>Interview Details</h3>")
+              .append("<p><strong>Company:</strong> ").append(interview.getCompanyName()).append("</p>")
+              .append("<p><strong>Position:</strong> ").append(interview.getPosition()).append("</p>")
+              .append("<p><strong>Date:</strong> ").append(interview.getDate().format(DATE_FORMATTER)).append("</p>")
+              .append("<p><strong>Time:</strong> ").append(interview.getTime().format(TIME_FORMATTER)).append("</p>")
+              .append("<p><strong>Type:</strong> ").append(interview.getType()).append("</p>");
+            
+            if (interview.getStatus() != null) {
+                sb.append("<p><strong>Status:</strong> <span class=\"status\">").append(interview.getStatus()).append("</span></p>");
+            }
+            
+            if (interview.getLocation() != null && !interview.getLocation().isEmpty()) {
+                sb.append("<p><strong>Location:</strong> ").append(interview.getLocation()).append("</p>");
+            }
+            
+            sb.append("</div>");
+        }
+        
+        sb.append("<p>You can view more details by logging into your WorkflowGo account.</p>")
+          .append("<div class=\"footer\">")
+          .append("<p>This is an automated message, please do not reply to this email.</p>")
+          .append("<p>&copy; ").append(java.time.Year.now().getValue()).append(" WorkflowGo. All rights reserved.</p>")
+          .append("</div>")
+          .append("</div>")
+          .append("</body>")
+          .append("</html>");
+        
+        return sb.toString();
     }
 
     private String createHtmlVerificationEmail(String code, int expirationMinutes) {

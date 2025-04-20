@@ -62,9 +62,8 @@ public class DocumentService {
         document.setName(name);
         
         if (file != null && !file.isEmpty()) {
-            String publicId = extractPublicIdFromUrl(document.getUrl());
-            if (publicId != null) {
-                cloudinaryService.deleteFile(publicId);
+            if (document.getUrl() != null) {
+                cloudinaryService.deleteFile(document.getUrl());
             }
             
             String fileUrl = cloudinaryService.uploadFile(file);
@@ -79,9 +78,8 @@ public class DocumentService {
     public void deleteDocument(Long documentId, Long userId) {
         Document document = getDocumentById(documentId, userId);
         
-        String publicId = extractPublicIdFromUrl(document.getUrl());
-        if (publicId != null) {
-            cloudinaryService.deleteFile(publicId);
+        if (document.getUrl() != null) {
+            cloudinaryService.deleteFile(document.getUrl());
         }
         
         documentRepository.delete(document);
@@ -99,19 +97,5 @@ public class DocumentService {
     public long getDocumentCount(Long userId) {
         return documentRepository.countByUserId(userId);
     }
-    
-    private String extractPublicIdFromUrl(String url) {
-        try {
-            if (url != null && url.contains("/upload/")) {
-                String afterUpload = url.split("/upload/")[1];
-                if (afterUpload.startsWith("v")) {
-                    afterUpload = afterUpload.replaceFirst("v\\d+/", "");
-                }
-                return afterUpload.substring(0, afterUpload.lastIndexOf("."));
-            }
-        } catch (Exception e) {
-            log.error("Failed to extract public_id from Cloudinary URL", e);
-        }
-        return null;
-    }
+
 }

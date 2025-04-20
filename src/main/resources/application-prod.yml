@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 20000
@@ -54,6 +54,6 @@ management:
 app:
   auth:
     authorized-redirect-uris: ${APP_REDIRECT_URI}
-    client-id: ${APP_CLIENT_ID}
-    client-secret: ${APP_CLIENT_SECRET}
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
     token-secret: ${JWT_SECRET}

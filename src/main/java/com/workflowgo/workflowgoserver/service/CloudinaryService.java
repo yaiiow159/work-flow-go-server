@@ -9,11 +9,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class CloudinaryService {
 
     private final Cloudinary cloudinary;
+    private static final Pattern PUBLIC_ID_PATTERN = Pattern.compile("/([^/]+)\\.[^/\\.]+$");
 
     public CloudinaryService(Cloudinary cloudinary) {
         this.cloudinary = cloudinary;
@@ -22,23 +25,39 @@ public class CloudinaryService {
     public String uploadFile(MultipartFile file) {
         try {
             String fileName = generateFileName(file.getOriginalFilename());
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
-                    ObjectUtils.asMap(
-                            "public_id", fileName,
-                            "resource_type", "auto"
-                    ));
+            Map uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap("resource_type", "auto")
+            );
             return (String) uploadResult.get("secure_url");
         } catch (IOException e) {
             throw new FileStorageException("Failed to upload file to Cloudinary", e);
         }
     }
 
-    public void deleteFile(String publicId) {
+    public void deleteFile(String fileUrl) {
         try {
-            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            String publicId = extractPublicIdFromUrl(fileUrl);
+            if (publicId != null) {
+                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            } else {
+                throw new FileStorageException("Could not extract public ID from URL: " + fileUrl);
+            }
         } catch (IOException e) {
             throw new FileStorageException("Failed to delete file from Cloudinary", e);
         }
+    }
+
+    private String extractPublicIdFromUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            return null;
+        }
+        
+        Matcher matcher = PUBLIC_ID_PATTERN.matcher(url);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 
     private String generateFileName(String originalFileName) {

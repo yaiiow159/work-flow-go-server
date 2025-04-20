@@ -23,7 +23,7 @@ public class OpenApiConfig {
                         .contact(new Contact()
                                 .name("Timmy Chung")
                                 .email("examyou076@gmail.com")
-                                .url("https://workflow-go.com"))
+                                .url("https://www.workflow-go.com"))
                         .license(new License()
                                 .name("MIT License")
                                 .url("https://opensource.org/licenses/MIT")))

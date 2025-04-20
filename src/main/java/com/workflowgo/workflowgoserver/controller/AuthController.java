@@ -18,6 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -120,10 +122,10 @@ public class AuthController {
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         user.setProvider(AuthProvider.local);
+        user.setProviderId(UUID.randomUUID().toString());
         user.setEmailVerified(true); 
         user = userRepository.save(user);
 
-        // Authenticate the user and generate token
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 signUpRequest.getEmail(),

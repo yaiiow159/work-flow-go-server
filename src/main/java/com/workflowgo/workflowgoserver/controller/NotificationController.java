@@ -1,9 +1,11 @@
 package com.workflowgo.workflowgoserver.controller;
 
 import com.workflowgo.workflowgoserver.dto.NotificationDTO;
+import com.workflowgo.workflowgoserver.payload.NotificationRequest;
 import com.workflowgo.workflowgoserver.security.CurrentUser;
 import com.workflowgo.workflowgoserver.security.UserPrincipal;
 import com.workflowgo.workflowgoserver.service.NotificationService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +34,22 @@ public class NotificationController {
     public ResponseEntity<Long> getUnreadCount(@CurrentUser UserPrincipal userPrincipal) {
         long unreadCount = notificationService.getUnreadCount(userPrincipal.getId());
         return ResponseEntity.ok(unreadCount);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<NotificationDTO> createNotification(
+            @CurrentUser UserPrincipal userPrincipal,
+            @Valid @RequestBody NotificationRequest request) {
+        NotificationDTO notification = notificationService.createNotification(
+                userPrincipal.getId(),
+                request.getTitle(),
+                request.getMessage(),
+                request.getType(),
+                request.getRelatedEntityId(),
+                request.getRelatedEntityType()
+        );
+        return ResponseEntity.ok(notification);
     }
 
     @PutMapping("/{id}/read")
