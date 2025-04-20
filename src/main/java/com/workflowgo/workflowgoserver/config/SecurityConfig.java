@@ -1,10 +1,10 @@
 package com.workflowgo.workflowgoserver.config;
 
-import com.workflowgo.workflowgoserver.security.CustomUserDetailsService;
 import com.workflowgo.workflowgoserver.security.OAuth2AuthenticationSuccessHandler;
 import com.workflowgo.workflowgoserver.security.OAuth2UserService;
 import com.workflowgo.workflowgoserver.security.TokenAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Value;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,15 +35,13 @@ public class SecurityConfig {
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final AppProperties appProperties;
+    private final TokenAuthenticationFilter tokenAuthenticationFilter;
 
-    public SecurityConfig(OAuth2UserService oAuth2UserService, OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler, String[] allowedOrigins, AppProperties appProperties) {
+    public SecurityConfig(OAuth2UserService oAuth2UserService, OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler, AppProperties appProperties, TokenAuthenticationFilter tokenAuthenticationFilter) {
         this.oAuth2UserService = oAuth2UserService;
         this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
         this.appProperties = appProperties;
-    }
-    @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter();
+        this.tokenAuthenticationFilter = tokenAuthenticationFilter;
     }
 
     @Bean
@@ -62,7 +60,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(appProperties.getCors().getAllowedOrigins()));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
-        configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
+        configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials", "Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
         
@@ -81,30 +79,30 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/",
-                    "/error",
-                    "/favicon.ico",
-                    "/**/*.png",
-                    "/**/*.gif",
-                    "/**/*.svg",
-                    "/**/*.jpg",
-                    "/**/*.html",
-                    "/**/*.css",
-                    "/**/*.js").permitAll()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/auth/**", "/oauth2/**", "/actuator/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
+            ).exceptionHandling(
+                    exception -> exception.authenticationEntryPoint((req, res, ex) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED)))
+            .logout(logout -> logout
+                .logoutUrl("/api/auth/logout")
+                .clearAuthentication(true)
+                    .logoutSuccessHandler(
+                        (request, response, authentication) -> {
+                            response.setStatus(200);
+                            response.getWriter().write("Logout successful");
+                        }
+                    )
             )
             .oauth2Login(oauth2 -> oauth2
-                .authorizationEndpoint(authorization -> authorization
-                    .baseUri("/oauth2/authorize"))
                 .redirectionEndpoint(redirection -> redirection
-                    .baseUri("/oauth2/callback/*"))
+                        .baseUri("/oauth2/callback/*"))
                 .userInfoEndpoint(userInfo -> userInfo
-                    .userService(oAuth2UserService))
+                        .userService(oAuth2UserService))
                 .successHandler(oAuth2AuthenticationSuccessHandler));
 
-        http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        
+        http.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }

@@ -29,7 +29,7 @@ public class User {
     @Column(nullable = false)
     private String email;
     
-    private String imageUrl;
+    private String photoURL;
     
     @Column(nullable = false)
     private Boolean emailVerified = false;
@@ -41,6 +41,17 @@ public class User {
     
     private String providerId;
 
+    @Column(length = 1000)
+    private String bio;
+    
+    private String phone;
+    
+    private String location;
+    
+    private String company;
+    
+    private String position;
+
     @Embedded
     private UserPreferences preferences = new UserPreferences();
     
@@ -51,6 +62,10 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<Document> documents = new HashSet<>();
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<Notification> notifications = new HashSet<>();
 
     @Override
     public final boolean equals(Object o) {

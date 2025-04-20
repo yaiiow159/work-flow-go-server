@@ -5,21 +5,25 @@ import lombok.Data;
 
 @Data
 public class AuthDTO {
-    private Long id;
-    private String name;
+    private String id;
     private String email;
-    private String imageUrl;
+    private String displayName;
+    private String photoURL;
+    private String authProvider;
+    private String token;
     
-    public static AuthDTO fromUser(User user) {
+    public static AuthDTO fromUser(User user, String token) {
         if (user == null) {
             return null;
         }
         
         AuthDTO dto = new AuthDTO();
-        dto.setId(user.getId());
-        dto.setName(user.getName());
+        dto.setId(user.getId().toString());
         dto.setEmail(user.getEmail());
-        dto.setImageUrl(user.getImageUrl());
+        dto.setDisplayName(user.getName());
+        dto.setPhotoURL(user.getPhotoURL());
+        dto.setAuthProvider(user.getProvider().toString());
+        dto.setToken(token);
         return dto;
     }
 }

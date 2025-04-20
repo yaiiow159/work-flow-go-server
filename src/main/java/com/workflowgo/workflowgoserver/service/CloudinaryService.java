@@ -3,7 +3,6 @@ package com.workflowgo.workflowgoserver.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.workflowgo.workflowgoserver.exception.FileStorageException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,7 +15,6 @@ public class CloudinaryService {
 
     private final Cloudinary cloudinary;
 
-    @Autowired
     public CloudinaryService(Cloudinary cloudinary) {
         this.cloudinary = cloudinary;
     }

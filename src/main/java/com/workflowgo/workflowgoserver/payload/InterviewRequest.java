@@ -11,22 +11,22 @@ import java.time.LocalTime;
 
 @Data
 public class InterviewRequest {
-    @NotBlank
+    @NotBlank(message = "Company name is required")
     private String companyName;
     
-    @NotBlank
+    @NotBlank(message = "Position is required")
     private String position;
     
-    @NotNull
+    @NotNull(message = "Date is required")
     private LocalDate date;
     
-    @NotNull
+    @NotNull(message = "Time is required")
     private LocalTime time;
     
-    @NotNull
+    @NotNull(message = "Type is required")
     private InterviewType type;
     
-    @NotNull
+    @NotNull(message = "Status is required")
     private InterviewStatus status;
     
     private String location;

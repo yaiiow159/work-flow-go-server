@@ -5,6 +5,7 @@ import com.workflowgo.workflowgoserver.security.CurrentUser;
 import com.workflowgo.workflowgoserver.security.UserPrincipal;
 import com.workflowgo.workflowgoserver.service.StatisticsService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,11 +26,11 @@ public class StatisticsController {
 
     @GetMapping("/interviews")
     @PreAuthorize("hasRole('USER')")
-    public InterviewStatistics getInterviewStatistics(
+    public ResponseEntity<InterviewStatistics> getInterviewStatistics(
             @CurrentUser UserPrincipal currentUser,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         
-        return statisticsService.getInterviewStatistics(currentUser.getId(), from, to);
+        return ResponseEntity.ok(statisticsService.getInterviewStatistics(currentUser.getId(), from, to));
     }
 }

@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/user")
@@ -24,29 +23,19 @@ public class UserSettingsController {
 
     @GetMapping("/settings")
     @PreAuthorize("hasRole('USER')")
-    public UserSettingsDTO getUserSettings(@CurrentUser UserPrincipal currentUser) {
+    public ResponseEntity<UserSettingsDTO> getUserSettings(@CurrentUser UserPrincipal currentUser) {
         User user = userService.getUserById(currentUser.getId());
-        return UserSettingsDTO.fromUser(user);
+        return ResponseEntity.ok(UserSettingsDTO.fromUser(user));
     }
 
     @PutMapping("/settings")
     @PreAuthorize("hasRole('USER')")
-    public UserSettingsDTO updateUserSettings(
+    public ResponseEntity<UserSettingsDTO> updateUserSettings(
             @Valid @RequestBody UserSettingsRequest settingsRequest,
             @CurrentUser UserPrincipal currentUser) {
         
         User user = userService.updateUserSettings(currentUser.getId(), settingsRequest);
-        return UserSettingsDTO.fromUser(user);
-    }
-
-    @PostMapping("/profile-image")
-    @PreAuthorize("hasRole('USER')")
-    public UserSettingsDTO uploadProfileImage(
-            @RequestParam("file") MultipartFile file,
-            @CurrentUser UserPrincipal currentUser) {
-        
-        User user = userService.updateProfileImage(currentUser.getId(), file);
-        return UserSettingsDTO.fromUser(user);
+        return ResponseEntity.ok(UserSettingsDTO.fromUser(user));
     }
 
     @GetMapping("/export")
@@ -62,8 +51,8 @@ public class UserSettingsController {
 
     @PostMapping("/settings/reset")
     @PreAuthorize("hasRole('USER')")
-    public UserSettingsDTO resetUserSettings(@CurrentUser UserPrincipal currentUser) {
+    public ResponseEntity<UserSettingsDTO> resetUserSettings(@CurrentUser UserPrincipal currentUser) {
         User user = userService.resetUserSettings(currentUser.getId());
-        return UserSettingsDTO.fromUser(user);
+        return ResponseEntity.ok(UserSettingsDTO.fromUser(user));
     }
 }

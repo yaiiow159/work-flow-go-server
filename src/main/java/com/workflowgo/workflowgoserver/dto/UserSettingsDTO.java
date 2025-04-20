@@ -8,7 +8,7 @@ public class UserSettingsDTO {
     private Long id;
     private String name;
     private String email;
-    private String imageUrl;
+    private String photoURL;
     private Boolean emailVerified;
     private UserPreferencesDTO preferences;
     
@@ -21,7 +21,7 @@ public class UserSettingsDTO {
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
-        dto.setImageUrl(user.getImageUrl());
+        dto.setPhotoURL(user.getPhotoURL());
         dto.setEmailVerified(user.getEmailVerified());
         dto.setPreferences(UserPreferencesDTO.fromUserPreferences(user.getPreferences()));
         return dto;

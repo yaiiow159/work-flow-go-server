@@ -1,12 +1,13 @@
 package com.workflowgo.workflowgoserver.service;
 
 import com.workflowgo.workflowgoserver.exception.ResourceNotFoundException;
-import com.workflowgo.workflowgoserver.model.*;
+import com.workflowgo.workflowgoserver.model.ContactPerson;
+import com.workflowgo.workflowgoserver.model.Interview;
+import com.workflowgo.workflowgoserver.model.User;
 import com.workflowgo.workflowgoserver.model.enums.InterviewStatus;
 import com.workflowgo.workflowgoserver.payload.InterviewRequest;
 import com.workflowgo.workflowgoserver.repository.InterviewRepository;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +18,14 @@ import java.util.stream.Collectors;
 @Service
 public class InterviewService {
 
-    @Autowired
-    private InterviewRepository interviewRepository;
+    private final InterviewRepository interviewRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public InterviewService(InterviewRepository interviewRepository, UserRepository userRepository) {
+        this.interviewRepository = interviewRepository;
+        this.userRepository = userRepository;
+    }
 
     public List<Interview> getInterviews(Long userId, InterviewStatus status, LocalDate from, LocalDate to,
                                          String company, String sort, String order) {

@@ -6,6 +6,6 @@ import lombok.Data;
 
 @Data
 public class StatusUpdateRequest {
-    @NotNull
+    @NotNull(message = "Status is required")
     private InterviewStatus status;
 }

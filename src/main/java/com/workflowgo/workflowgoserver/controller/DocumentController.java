@@ -34,9 +34,9 @@ public class DocumentController {
 
     @GetMapping
     @PreAuthorize("hasRole('USER')")
-    public List<DocumentDTO> getAllDocuments(@CurrentUser UserPrincipal currentUser) {
+    public ResponseEntity<List<DocumentDTO>> getAllDocuments(@CurrentUser UserPrincipal currentUser) {
         List<Document> documents = documentService.getAllDocumentsByUser(currentUser.getId());
-        return DocumentDTO.fromDocuments(documents);
+        return ResponseEntity.ok(DocumentDTO.fromDocuments(documents));
     }
 
     @PostMapping

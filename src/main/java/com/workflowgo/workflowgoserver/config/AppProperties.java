@@ -18,12 +18,20 @@ public class AppProperties {
         private String tokenSecret;
         private long tokenExpirationMsec;
         private String authorizedRedirectUris;
+        private String refreshToken;
     }
 
     @Setter
     @Getter
     public static class Cors {
         private String[] allowedOrigins;
+        
+        public String[] getAllowedOrigins() {
+            if (allowedOrigins != null && allowedOrigins.length == 1 && allowedOrigins[0].contains(",")) {
+                return allowedOrigins[0].split(",");
+            }
+            return allowedOrigins;
+        }
     }
 
 }

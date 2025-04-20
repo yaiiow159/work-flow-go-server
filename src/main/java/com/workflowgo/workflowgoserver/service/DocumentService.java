@@ -2,12 +2,11 @@ package com.workflowgo.workflowgoserver.service;
 
 import com.workflowgo.workflowgoserver.exception.ResourceNotFoundException;
 import com.workflowgo.workflowgoserver.model.Document;
-import com.workflowgo.workflowgoserver.model.enums.DocumentType;
 import com.workflowgo.workflowgoserver.model.User;
+import com.workflowgo.workflowgoserver.model.enums.DocumentType;
 import com.workflowgo.workflowgoserver.repository.DocumentRepository;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -23,8 +22,7 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
-    
-    @Autowired
+
     public DocumentService(DocumentRepository documentRepository, 
                           UserRepository userRepository,
                           CloudinaryService cloudinaryService) {
@@ -64,13 +62,11 @@ public class DocumentService {
         document.setName(name);
         
         if (file != null && !file.isEmpty()) {
-            // Delete old file if it exists
             String publicId = extractPublicIdFromUrl(document.getUrl());
             if (publicId != null) {
                 cloudinaryService.deleteFile(publicId);
             }
             
-            // Upload new file
             String fileUrl = cloudinaryService.uploadFile(file);
             document.setUrl(fileUrl);
             document.setContentType(file.getContentType());
@@ -83,13 +79,11 @@ public class DocumentService {
     public void deleteDocument(Long documentId, Long userId) {
         Document document = getDocumentById(documentId, userId);
         
-        // Extract public_id from Cloudinary URL
         String publicId = extractPublicIdFromUrl(document.getUrl());
         if (publicId != null) {
             cloudinaryService.deleteFile(publicId);
         }
         
-        // Delete from database
         documentRepository.delete(document);
     }
 

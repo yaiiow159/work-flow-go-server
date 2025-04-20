@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:workflowgodb}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 20000
@@ -31,15 +31,16 @@ spring:
       max-request-size: 10MB
 
 server:
-  port: ${SERVER_PORT:8081}
+  port: ${SERVER_PORT}
   servlet:
     context-path: /api
 
 app:
   auth:
     tokenSecret: ${JWT_SECRET}
-    tokenExpirationMsec: ${JWT_EXPIRATION:864000000}
-    authorizedRedirectUris: ${FRONTEND_URL}/oauth2/redirect
+    tokenExpirationMsec: ${JWT_EXPIRATION}
+    authorizedRedirectUris: ${APP_REDIRECT_URI}
+    refreshToken: ${APP_REFRESH_TOKEN}
   cors:
     allowedOrigins: ${ALLOWED_ORIGINS}
 

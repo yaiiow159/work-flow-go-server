@@ -1,5 +1,6 @@
 package com.workflowgo.workflowgoserver.dto;
 
+import com.workflowgo.workflowgoserver.model.Document;
 import com.workflowgo.workflowgoserver.model.Interview;
 import com.workflowgo.workflowgoserver.model.enums.InterviewStatus;
 import com.workflowgo.workflowgoserver.model.enums.InterviewType;
@@ -59,7 +60,7 @@ public class InterviewDTO {
         
         if (interview.getDocuments() != null) {
             dto.setDocumentIds(interview.getDocuments().stream()
-                    .map(doc -> doc.getId())
+                    .map(Document::getId)
                     .collect(Collectors.toList()));
         }
         

@@ -1,5 +1,6 @@
 package com.workflowgo.workflowgoserver.controller;
 
+import com.workflowgo.workflowgoserver.dto.AuthDTO;
 import com.workflowgo.workflowgoserver.model.User;
 import com.workflowgo.workflowgoserver.model.enums.AuthProvider;
 import com.workflowgo.workflowgoserver.payload.ApiResponse;
@@ -8,7 +9,9 @@ import com.workflowgo.workflowgoserver.payload.LoginRequest;
 import com.workflowgo.workflowgoserver.payload.SignUpRequest;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
 import com.workflowgo.workflowgoserver.security.TokenProvider;
+import com.workflowgo.workflowgoserver.security.UserPrincipal;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,11 +25,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
-
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final TokenProvider tokenProvider;
 
     public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, TokenProvider tokenProvider) {
@@ -38,17 +38,28 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                loginRequest.getEmail(),
-                loginRequest.getPassword()
-            )
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                    loginRequest.getEmail(),
+                    loginRequest.getPassword()
+                )
+            );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String token = tokenProvider.createToken(authentication);
-        return ResponseEntity.ok(new AuthResponse(token));
+            UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+            User user = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+                
+            String token = tokenProvider.createToken(authentication);
+            
+            AuthDTO authDTO = AuthDTO.fromUser(user, token);
+            return ResponseEntity.ok(new AuthResponse(authDTO, token));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiResponse(false, e.getMessage() != null ? e.getMessage() : "Login failed"));
+        }
     }
 
     @PostMapping("/register")

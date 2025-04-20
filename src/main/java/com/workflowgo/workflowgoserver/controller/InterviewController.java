@@ -31,7 +31,7 @@ public class InterviewController {
 
     @GetMapping
     @PreAuthorize("hasRole('USER')")
-    public List<InterviewDTO> getInterviews(
+    public ResponseEntity<List<InterviewDTO>> getInterviews(
             @CurrentUser UserPrincipal currentUser,
             @RequestParam(required = false) InterviewStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
@@ -41,7 +41,7 @@ public class InterviewController {
             @RequestParam(required = false, defaultValue = "asc") String order) {
         
         List<Interview> interviews = interviewService.getInterviews(currentUser.getId(), status, from, to, company, sort, order);
-        return InterviewDTO.fromInterviews(interviews);
+        return ResponseEntity.ok(InterviewDTO.fromInterviews(interviews));
     }
 
     @PostMapping
@@ -61,27 +61,27 @@ public class InterviewController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
-    public InterviewDTO getInterviewById(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
+    public ResponseEntity<InterviewDTO> getInterviewById(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
         Interview interview = interviewService.getInterviewById(id, currentUser.getId());
-        return InterviewDTO.fromInterview(interview);
+        return ResponseEntity.ok(InterviewDTO.fromInterview(interview));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
-    public InterviewDTO updateInterview(@PathVariable Long id,
+    public ResponseEntity<InterviewDTO> updateInterview(@PathVariable Long id,
                                    @Valid @RequestBody InterviewRequest interviewRequest,
                                    @CurrentUser UserPrincipal currentUser) {
         Interview interview = interviewService.updateInterview(id, interviewRequest, currentUser.getId());
-        return InterviewDTO.fromInterview(interview);
+        return ResponseEntity.ok(InterviewDTO.fromInterview(interview));
     }
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('USER')")
-    public InterviewDTO updateInterviewStatus(@PathVariable Long id,
+    public ResponseEntity<InterviewDTO> updateInterviewStatus(@PathVariable Long id,
                                          @Valid @RequestBody StatusUpdateRequest statusRequest,
                                          @CurrentUser UserPrincipal currentUser) {
         Interview interview = interviewService.updateInterviewStatus(id, statusRequest.getStatus(), currentUser.getId());
-        return InterviewDTO.fromInterview(interview);
+        return ResponseEntity.ok(InterviewDTO.fromInterview(interview));
     }
 
     @DeleteMapping("/{id}")

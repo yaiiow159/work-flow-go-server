@@ -15,7 +15,6 @@ spring:
       idle-timeout: 300000
       max-lifetime: 1200000
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQL16Dialect
     hibernate:
       ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
     show-sql: false
@@ -74,6 +73,7 @@ app:
   auth:
     tokenSecret: ${JWT_SECRET:bd04b7c89bfd96a0f14a997f58f2246c37883f3825dd1a3f3d636f9fb0d386a0}
     tokenExpirationMsec: ${JWT_EXPIRATION:864000000}
-    authorizedRedirectUris: ${OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/redirect}
+    authorizedRedirectUris: ${APP_REDIRECT_URI:http://localhost:3000/oauth2/redirect/google}
+    refreshToken: ${APP_REFRESH_TOKEN:1//04HuyQnqic0tDCgYIARAAGAQSNwF-L9Ire3vpuUasohAZMQunPVDSbe0fhBmBxvKEBDX2_sx9WBdRoBOCZ1-73smRI2jHOiqcWag}
   cors:
-    allowedOrigins: ${ALLOWED_ORIGINS:http://localhost:3000}
+    allowedOrigins: ${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8081}

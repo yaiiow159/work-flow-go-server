@@ -1,8 +1,7 @@
 package com.workflowgo.workflowgoserver.exception;
 
 import com.workflowgo.workflowgoserver.payload.ApiResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,43 +16,49 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponse handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
-        logger.error("Resource not found exception", ex);
+        log.error("Resource not found exception", ex);
+        return new ApiResponse(false, ex.getMessage());
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse handleBadRequestException(BadRequestException ex, WebRequest request) {
+        log.error("Bad request exception", ex);
         return new ApiResponse(false, ex.getMessage());
     }
 
     @ExceptionHandler(FileStorageException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse handleFileStorageException(FileStorageException ex, WebRequest request) {
-        logger.error("File storage exception", ex);
+        log.error("File storage exception", ex);
         return new ApiResponse(false, ex.getMessage());
     }
 
     @ExceptionHandler(OAuth2AuthenticationProcessingException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiResponse handleOAuth2AuthenticationProcessingException(OAuth2AuthenticationProcessingException ex, WebRequest request) {
-        logger.error("OAuth2 authentication processing exception", ex);
+        log.error("OAuth2 authentication processing exception", ex);
         return new ApiResponse(false, ex.getMessage());
     }
 
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiResponse handleAuthenticationException(AuthenticationException ex, WebRequest request) {
-        logger.error("Authentication exception", ex);
+        log.error("Authentication exception", ex);
         return new ApiResponse(false, "Authentication failed: " + ex.getMessage());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ApiResponse handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
-        logger.error("Access denied exception", ex);
+        log.error("Access denied exception", ex);
         return new ApiResponse(false, "Access denied: " + ex.getMessage());
     }
 
@@ -72,7 +77,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse handleGlobalException(Exception ex, WebRequest request) {
-        logger.error("Global exception handler caught: ", ex);
+        log.error("Global exception handler caught: ", ex);
         return new ApiResponse(false, "An unexpected error occurred: " + ex.getMessage());
     }
 }

@@ -12,12 +12,12 @@ import com.workflowgo.workflowgoserver.repository.InterviewRepository;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 @Service
 public class UserService {
@@ -26,18 +26,15 @@ public class UserService {
     private final InterviewRepository interviewRepository;
     private final DocumentRepository documentRepository;
     private final ObjectMapper objectMapper;
-    private final CloudinaryService cloudinaryService;
 
     public UserService(UserRepository userRepository,
                       InterviewRepository interviewRepository,
                       DocumentRepository documentRepository,
-                      ObjectMapper objectMapper,
-                      CloudinaryService cloudinaryService) {
+                      ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.interviewRepository = interviewRepository;
         this.documentRepository = documentRepository;
         this.objectMapper = objectMapper;
-        this.cloudinaryService = cloudinaryService;
     }
 
     public User getUserById(Long userId) {
@@ -52,6 +49,12 @@ public class UserService {
             user.setName(settingsRequest.getDisplayName());
         }
         
+        user.setBio(settingsRequest.getBio());
+        user.setPhone(settingsRequest.getPhone());
+        user.setLocation(settingsRequest.getLocation());
+        user.setCompany(settingsRequest.getCompany());
+        user.setPosition(settingsRequest.getPosition());
+        
         UserPreferences preferences = user.getPreferences();
         if (preferences == null) {
             preferences = new UserPreferences();
@@ -65,15 +68,6 @@ public class UserService {
         preferences.setDefaultView(settingsRequest.getDefaultView());
         preferences.setCompactMode(settingsRequest.isCompactMode());
         
-        return userRepository.save(user);
-    }
-
-    public User updateProfileImage(Long userId, MultipartFile file) {
-        User user = getUserById(userId);
-        
-        String imageUrl = cloudinaryService.uploadFile(file);
-        
-        user.setImageUrl(imageUrl);
         return userRepository.save(user);
     }
 

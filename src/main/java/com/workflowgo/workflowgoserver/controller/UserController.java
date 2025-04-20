@@ -1,6 +1,7 @@
 package com.workflowgo.workflowgoserver.controller;
 
 import com.workflowgo.workflowgoserver.dto.UserDTO;
+import com.workflowgo.workflowgoserver.dto.UserProfileDTO;
 import com.workflowgo.workflowgoserver.exception.ResourceNotFoundException;
 import com.workflowgo.workflowgoserver.model.User;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
@@ -30,13 +31,13 @@ public class UserController {
         
         return ResponseEntity.ok(UserDTO.fromUser(user));
     }
-    
+
     @GetMapping("/profile")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserDTO> getUserProfile(@CurrentUser UserPrincipal userPrincipal) {
+    public ResponseEntity<UserProfileDTO> getUserProfile(@CurrentUser UserPrincipal userPrincipal) {
         User user = userRepository.findById(userPrincipal.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userPrincipal.getId()));
         
-        return ResponseEntity.ok(UserDTO.fromUser(user));
+        return ResponseEntity.ok(UserProfileDTO.fromUser(user));
     }
 }

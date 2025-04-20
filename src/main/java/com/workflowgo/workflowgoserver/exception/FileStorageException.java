@@ -1,11 +1,11 @@
 package com.workflowgo.workflowgoserver.exception;
 
 public class FileStorageException extends RuntimeException {
-    public FileStorageException(String message) {
-        super(message);
+    public FileStorageException(String msg) {
+        super(msg);
     }
 
-    public FileStorageException(String message, Throwable cause) {
-        super(message, cause);
+    public FileStorageException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 }
