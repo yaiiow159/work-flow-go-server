@@ -17,4 +17,7 @@ public class SignUpRequest {
 
     @NotBlank(message = "Password is required")
     private String password;
+    
+    @NotBlank(message = "Verification code is required")
+    private String verificationCode;
 }

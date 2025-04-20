@@ -75,5 +75,16 @@ app:
     tokenExpirationMsec: ${JWT_EXPIRATION:864000000}
     authorizedRedirectUris: ${APP_REDIRECT_URI:http://localhost:3000/oauth2/redirect/google}
     refreshToken: ${APP_REFRESH_TOKEN:1//04HuyQnqic0tDCgYIARAAGAQSNwF-L9Ire3vpuUasohAZMQunPVDSbe0fhBmBxvKEBDX2_sx9WBdRoBOCZ1-73smRI2jHOiqcWag}
+    clientId: ${APP_CLIENT_ID:568f84172230-nspmfd7nfwsfr7ph2m4gmgp0oev9i.apps.googleusercontent.com}
+    clientSecret: ${APP_CLIENT_SECRET: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}
   cors:
     allowedOrigins: ${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8081}
+  email:
+    senderEmail: ${EMAIL_SENDER:jhanghongwun0728@gmail.com}
+    verificationSubject: ${EMAIL_VERIFICATION_SUBJECT:WorkflowGo Email Verification}
+    verificationTemplate: 'Your WorkflowGo verification code is: %s
+
+      This code will expire in %d minutes.
+
+      If you did not request this code, please ignore this email.'
+    verificationCodeExpirationMinutes: ${EMAIL_VERIFICATION_EXPIRATION:30}

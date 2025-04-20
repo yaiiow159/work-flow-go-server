@@ -1,12 +1,12 @@
 package com.workflowgo.workflowgoserver.service;
 
 import com.workflowgo.workflowgoserver.dto.UserInfoDTO;
+import com.workflowgo.workflowgoserver.dto.UserSettingsDTO;
 import com.workflowgo.workflowgoserver.exception.ResourceNotFoundException;
 import com.workflowgo.workflowgoserver.model.User;
 import com.workflowgo.workflowgoserver.payload.UserSettingsRequest;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,19 +20,10 @@ public class UserProfileService {
 
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserProfileService(UserRepository userRepository, CloudinaryService cloudinaryService, PasswordEncoder passwordEncoder) {
+    public UserProfileService(UserRepository userRepository, CloudinaryService cloudinaryService) {
         this.userRepository = userRepository;
         this.cloudinaryService = cloudinaryService;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    public UserInfoDTO getCurrentUserInfo(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-
-        return convertToUserInfoDTO(user);
     }
 
     @Transactional
@@ -51,9 +42,9 @@ public class UserProfileService {
 
         return convertToUserInfoDTO(user);
     }
-
+    
     @Transactional
-    public String updateProfileImage(Long userId, MultipartFile imageFile) throws IOException {
+    public UserSettingsDTO updateProfileImageAndReturnSettings(Long userId, MultipartFile imageFile) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
@@ -64,16 +55,16 @@ public class UserProfileService {
                     cloudinaryService.deleteFile(publicId);
                 }
             } catch (Exception e) {
-                System.err.println("Failed to delete old profile image: " + e.getMessage());
+                log.error("Failed to delete old profile image: {}", e.getMessage());
             }
         }
 
         String imageUrl = cloudinaryService.uploadFile(imageFile);
 
         user.setPhotoURL(imageUrl);
-        userRepository.save(user);
+        user = userRepository.save(user);
 
-        return imageUrl;
+        return UserSettingsDTO.fromUser(user);
     }
 
     private String extractPublicIdFromUrl(String url) {

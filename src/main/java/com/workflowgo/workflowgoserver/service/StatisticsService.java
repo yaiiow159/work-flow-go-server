@@ -5,21 +5,26 @@ import com.workflowgo.workflowgoserver.model.enums.InterviewStatus;
 import com.workflowgo.workflowgoserver.payload.InterviewStatistics;
 import com.workflowgo.workflowgoserver.payload.StatisticItem;
 import com.workflowgo.workflowgoserver.repository.InterviewRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class StatisticsService {
 
-    @Autowired
-    private InterviewRepository interviewRepository;
+    private final InterviewRepository interviewRepository;
+
+    public StatisticsService(InterviewRepository interviewRepository) {
+        this.interviewRepository = interviewRepository;
+    }
 
     public InterviewStatistics getInterviewStatistics(Long userId, LocalDate from, LocalDate to) {
         List<Interview> interviews = interviewRepository.findByUserId(userId, Sort.by(Sort.Direction.ASC, "date"));

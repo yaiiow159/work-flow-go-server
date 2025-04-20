@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 public class AppProperties {
     private final Auth auth = new Auth();
     private final Cors cors = new Cors();
+    private final Email email = new Email();
 
     @Setter
     @Getter
@@ -19,6 +20,8 @@ public class AppProperties {
         private long tokenExpirationMsec;
         private String authorizedRedirectUris;
         private String refreshToken;
+        private String clientId;
+        private String clientSecret;
     }
 
     @Setter
@@ -34,4 +37,12 @@ public class AppProperties {
         }
     }
 
+    @Setter
+    @Getter
+    public static class Email {
+        private String senderEmail;
+        private String verificationSubject;
+        private String verificationTemplate;
+        private int verificationCodeExpirationMinutes;
+    }
 }

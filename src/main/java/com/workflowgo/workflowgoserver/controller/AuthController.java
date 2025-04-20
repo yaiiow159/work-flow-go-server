@@ -3,13 +3,11 @@ package com.workflowgo.workflowgoserver.controller;
 import com.workflowgo.workflowgoserver.dto.AuthDTO;
 import com.workflowgo.workflowgoserver.model.User;
 import com.workflowgo.workflowgoserver.model.enums.AuthProvider;
-import com.workflowgo.workflowgoserver.payload.ApiResponse;
-import com.workflowgo.workflowgoserver.payload.AuthResponse;
-import com.workflowgo.workflowgoserver.payload.LoginRequest;
-import com.workflowgo.workflowgoserver.payload.SignUpRequest;
+import com.workflowgo.workflowgoserver.payload.*;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
 import com.workflowgo.workflowgoserver.security.TokenProvider;
 import com.workflowgo.workflowgoserver.security.UserPrincipal;
+import com.workflowgo.workflowgoserver.service.VerificationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,12 +26,18 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
+    private final VerificationService verificationService;
 
-    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, TokenProvider tokenProvider) {
+    public AuthController(AuthenticationManager authenticationManager, 
+                         UserRepository userRepository, 
+                         PasswordEncoder passwordEncoder, 
+                         TokenProvider tokenProvider,
+                         VerificationService verificationService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
+        this.verificationService = verificationService;
     }
 
     @PostMapping("/login")
@@ -62,6 +66,40 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/verify-email/request")
+    public ResponseEntity<?> requestEmailVerification(@Valid @RequestBody EmailVerificationRequest request) {
+        try {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                return ResponseEntity.badRequest()
+                    .body(new ApiResponse(false, "Email address already in use."));
+            }
+            
+            verificationService.requestEmailVerification(request.getEmail());
+            
+            return ResponseEntity.ok(new ApiResponse(true, "Verification code sent successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse(false, "Failed to send verification code: " + e.getMessage()));
+        }
+    }
+    
+    @PostMapping("/verify-email/verify")
+    public ResponseEntity<?> verifyEmailCode(@Valid @RequestBody EmailVerificationCodeRequest request) {
+        try {
+            boolean isValid = verificationService.verifyEmailCode(request.getEmail(), request.getCode());
+            
+            if (isValid) {
+                return ResponseEntity.ok(new ApiResponse(true, "Email verification successful"));
+            } else {
+                return ResponseEntity.badRequest()
+                    .body(new ApiResponse(false, "Invalid verification code"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse(false, "Failed to verify code: " + e.getMessage()));
+        }
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
         if(userRepository.existsByEmail(signUpRequest.getEmail())) {
@@ -69,15 +107,35 @@ public class AuthController {
                 .body(new ApiResponse(false, "Email address already in use."));
         }
 
+        boolean isCodeValid = verificationService.verifyEmailCode(
+            signUpRequest.getEmail(), signUpRequest.getVerificationCode());
+            
+        if (!isCodeValid) {
+            return ResponseEntity.badRequest()
+                .body(new ApiResponse(false, "Invalid verification code"));
+        }
+
         User user = new User();
         user.setName(signUpRequest.getName());
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         user.setProvider(AuthProvider.local);
-        user.setEmailVerified(false);
-        userRepository.save(user);
+        user.setEmailVerified(true); 
+        user = userRepository.save(user);
 
-        return ResponseEntity.ok().body(new ApiResponse(true, "User registered successfully"));
+        // Authenticate the user and generate token
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                signUpRequest.getEmail(),
+                signUpRequest.getPassword()
+            )
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = tokenProvider.createToken(authentication);
+        
+        AuthDTO authDTO = AuthDTO.fromUser(user, token);
+        return ResponseEntity.ok(new RegisterResponse(true, "User registered successfully", authDTO, token));
     }
     
     @GetMapping("/validate")

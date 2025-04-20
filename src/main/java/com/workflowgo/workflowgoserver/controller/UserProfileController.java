@@ -2,6 +2,7 @@ package com.workflowgo.workflowgoserver.controller;
 
 import com.workflowgo.workflowgoserver.dto.UserDTO;
 import com.workflowgo.workflowgoserver.dto.UserInfoDTO;
+import com.workflowgo.workflowgoserver.dto.UserSettingsDTO;
 import com.workflowgo.workflowgoserver.payload.PasswordChangeRequest;
 import com.workflowgo.workflowgoserver.payload.UserSettingsRequest;
 import com.workflowgo.workflowgoserver.security.CurrentUser;
@@ -48,10 +49,10 @@ public class UserProfileController {
 
     @PostMapping("/profile-image")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<String> uploadProfileImage(
+    public ResponseEntity<UserSettingsDTO> uploadProfileImage(
             @RequestParam("file") MultipartFile file,
             @CurrentUser UserPrincipal currentUser) throws IOException {
-        return ResponseEntity.ok(userProfileService.updateProfileImage(currentUser.getId(), file));
+        return ResponseEntity.ok(userProfileService.updateProfileImageAndReturnSettings(currentUser.getId(), file));
     }
     
     @PostMapping("/change-password")

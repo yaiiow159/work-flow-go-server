@@ -25,24 +25,7 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
 
-server:
-  port: ${SERVER_PORT}
-  servlet:
-    context-path: /api
-
-app:
-  auth:
-    tokenSecret: ${JWT_SECRET}
-    tokenExpirationMsec: ${JWT_EXPIRATION}
-    authorizedRedirectUris: ${APP_REDIRECT_URI}
-    refreshToken: ${APP_REFRESH_TOKEN}
-  cors:
-    allowedOrigins: ${ALLOWED_ORIGINS}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
@@ -68,3 +51,9 @@ management:
       show-details: when_authorized
       probes:
         enabled: true
+app:
+  auth:
+    authorized-redirect-uris: ${APP_REDIRECT_URI}
+    client-id: ${APP_CLIENT_ID}
+    client-secret: ${APP_CLIENT_SECRET}
+    token-secret: ${JWT_SECRET}
