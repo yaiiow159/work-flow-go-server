@@ -1,8 +1,5 @@
 package com.workflowgo.workflowgoserver.service;
 
-import com.google.api.client.util.Base64;
-import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.model.Message;
 import com.workflowgo.workflowgoserver.config.AppProperties;
 import com.workflowgo.workflowgoserver.model.Interview;
 import jakarta.mail.MessagingException;
@@ -24,13 +21,11 @@ import java.util.Properties;
 @Slf4j
 public class EmailService {
 
-    private final Gmail gmail;
     private final AppProperties appProperties;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
-    public EmailService(Gmail gmail, AppProperties appProperties) {
-        this.gmail = gmail;
+    public EmailService(AppProperties appProperties) {
         this.appProperties = appProperties;
     }
 
@@ -265,18 +260,9 @@ public class EmailService {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         email.writeTo(buffer);
         byte[] rawMessageBytes = buffer.toByteArray();
-        String encodedEmail = Base64.encodeBase64URLSafeString(rawMessageBytes);
-        
-        Message message = new Message();
-        message.setRaw(encodedEmail);
-        
-        log.debug("Sending HTML email via Gmail API");
-        try {
-            message = gmail.users().messages().send("me", message).execute();
-            log.info("HTML email sent successfully with message ID: {}", message.getId());
-        } catch (IOException e) {
-            log.error("Error sending HTML email via Gmail API", e);
-            throw e;
-        }
+        String encodedMessage = java.util.Base64.getEncoder().encodeToString(rawMessageBytes);
+        String encodedEmail = java.util.Base64.getEncoder().encodeToString(rawMessageBytes);
+
+        log.debug("Sending email to: {}", to);
     }
 }

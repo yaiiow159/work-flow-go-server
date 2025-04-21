@@ -43,7 +43,7 @@ spring:
               - profile
 
 server:
-  port: 8081
+  port: ${PORT:8081}
   servlet:
     context-path: /api
 
@@ -68,6 +68,11 @@ management:
       show-details: always
       probes:
         enabled: true
+
+# mail server
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:}
+  from:    ${SENDGRID_FROM:jhanghongwun0728@gmail.com}
 
 app:
   auth:

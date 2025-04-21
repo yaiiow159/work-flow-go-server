@@ -1,5 +1,6 @@
 package com.workflowgo.workflowgoserver.controller;
 
+import com.workflowgo.workflowgoserver.dto.UserInfoDTO;
 import com.workflowgo.workflowgoserver.dto.UserSettingsDTO;
 import com.workflowgo.workflowgoserver.model.User;
 import com.workflowgo.workflowgoserver.payload.UserSettingsRequest;
@@ -31,10 +32,10 @@ public class UserSettingsController {
     @PutMapping("/settings")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserSettingsDTO> updateUserSettings(
-            @Valid @RequestBody UserSettingsRequest settingsRequest,
+            @Valid @RequestBody UserInfoDTO userInfoRequest,
             @CurrentUser UserPrincipal currentUser) {
         
-        User user = userService.updateUserSettings(currentUser.getId(), settingsRequest);
+        User user = userService.updateUserSettings(currentUser.getId(), userInfoRequest);
         return ResponseEntity.ok(UserSettingsDTO.fromUser(user));
     }
 

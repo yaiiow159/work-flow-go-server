@@ -1,6 +1,8 @@
 package com.workflowgo.workflowgoserver.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import com.workflowgo.workflowgoserver.dto.UserInfoDTO;
 import com.workflowgo.workflowgoserver.exception.ResourceNotFoundException;
 import com.workflowgo.workflowgoserver.model.Document;
 import com.workflowgo.workflowgoserver.model.Interview;
@@ -42,31 +44,75 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
     }
 
-    public User updateUserSettings(Long userId, UserSettingsRequest settingsRequest) {
+    public User updateUserSettings(Long userId, UserInfoDTO userInfoDTO) {
         User user = getUserById(userId);
-        
-        if (settingsRequest.getDisplayName() != null && !settingsRequest.getDisplayName().isEmpty()) {
-            user.setName(settingsRequest.getDisplayName());
-        }
-        
-        user.setBio(settingsRequest.getBio());
-        user.setPhone(settingsRequest.getPhone());
-        user.setLocation(settingsRequest.getLocation());
-        user.setCompany(settingsRequest.getCompany());
-        user.setPosition(settingsRequest.getPosition());
 
-        UserPreferences preferences = user.getPreferences();
-        if (preferences == null) {
-            preferences = new UserPreferences();
-            user.setPreferences(preferences);
+        if (userInfoDTO.getName() != null && !userInfoDTO.getName().isEmpty()) {
+            user.setName(userInfoDTO.getName());
         }
 
-        preferences.setDarkMode(settingsRequest.isDarkMode());
-        preferences.setPrimaryColor(settingsRequest.getPrimaryColor());
-        preferences.setEmailNotifications(settingsRequest.isEmailNotifications());
-        preferences.setReminderTime(settingsRequest.getReminderTime());
-        preferences.setDefaultView(settingsRequest.getDefaultView());
-        preferences.setCompactMode(settingsRequest.isCompactMode());
+        if (userInfoDTO.getEmail() != null && !userInfoDTO.getEmail().isEmpty()) {
+            user.setEmail(userInfoDTO.getEmail());
+        }
+
+        if (userInfoDTO.getBio() != null) {
+            user.setBio(userInfoDTO.getBio());
+        }
+
+        if (userInfoDTO.getPhone() != null) {
+            user.setPhone(userInfoDTO.getPhone());
+        }
+
+        if (userInfoDTO.getLocation() != null) {
+            user.setLocation(userInfoDTO.getLocation());
+        }
+
+        if (userInfoDTO.getCompany() != null) {
+            user.setCompany(userInfoDTO.getCompany());
+        }
+
+        if (userInfoDTO.getPosition() != null) {
+            user.setPosition(userInfoDTO.getPosition());
+        }
+
+        if (userInfoDTO.getPhotoURL() != null) {
+            user.setPhotoURL(userInfoDTO.getPhotoURL());
+        }
+
+        if (userInfoDTO.getPreferences() != null) {
+            if (userInfoDTO.getPreferences().getTheme() != null) {
+                user.getPreferences().setDarkMode(
+                        userInfoDTO.getPreferences().getTheme().isDarkMode());
+
+                if (userInfoDTO.getPreferences().getTheme().getPrimaryColor() != null) {
+                    user.getPreferences().setPrimaryColor(
+                            userInfoDTO.getPreferences().getTheme().getPrimaryColor());
+                }
+            }
+
+            if (userInfoDTO.getPreferences().getNotifications() != null) {
+                user.getPreferences().setEmailNotifications(
+                        userInfoDTO.getPreferences().getNotifications().isEnabled());
+
+                user.getPreferences().setEmailNotifications(
+                        userInfoDTO.getPreferences().getNotifications().isEmailNotifications());
+
+                if (userInfoDTO.getPreferences().getNotifications().getReminderTime() != null) {
+                    user.getPreferences().setReminderTime(
+                            userInfoDTO.getPreferences().getNotifications().getReminderTime());
+                }
+            }
+
+            if (userInfoDTO.getPreferences().getDisplay() != null) {
+                if (userInfoDTO.getPreferences().getDisplay().getDefaultView() != null) {
+                    user.getPreferences().setDefaultView(
+                            userInfoDTO.getPreferences().getDisplay().getDefaultView());
+                }
+
+                user.getPreferences().setCompactMode(
+                        userInfoDTO.getPreferences().getDisplay().isCompactMode());
+            }
+        }
 
         return userRepository.save(user);
     }

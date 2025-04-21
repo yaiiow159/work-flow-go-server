@@ -12,7 +12,7 @@ public class InterviewStatusConverter implements AttributeConverter<InterviewSta
         if (attribute == null) {
             return null;
         }
-        return attribute.name(); // Store uppercase enum name to match database constraints
+        return attribute.name();
     }
 
     @Override
@@ -20,6 +20,6 @@ public class InterviewStatusConverter implements AttributeConverter<InterviewSta
         if (dbData == null) {
             return null;
         }
-        return InterviewStatus.valueOf(dbData); // Use valueOf for uppercase values
+        return InterviewStatus.valueOf(dbData);
     }
 }

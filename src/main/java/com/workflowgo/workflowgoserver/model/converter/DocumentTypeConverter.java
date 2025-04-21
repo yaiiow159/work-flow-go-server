@@ -12,7 +12,7 @@ public class DocumentTypeConverter implements AttributeConverter<DocumentType, S
         if (attribute == null) {
             return null;
         }
-        return attribute.name(); // Store uppercase enum name to match database constraints
+        return attribute.name();
     }
 
     @Override
@@ -20,6 +20,6 @@ public class DocumentTypeConverter implements AttributeConverter<DocumentType, S
         if (dbData == null) {
             return null;
         }
-        return DocumentType.valueOf(dbData); // Use valueOf for uppercase values
+        return DocumentType.valueOf(dbData);
     }
 }

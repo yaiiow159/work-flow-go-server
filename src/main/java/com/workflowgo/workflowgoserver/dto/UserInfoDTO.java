@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -51,6 +51,7 @@ public class UserInfoDTO {
         private NotificationPreferences notifications = new NotificationPreferences();
         private DisplayPreferences display = new DisplayPreferences();
     }
-    
+
+    @Builder.Default
     private Preferences preferences = new Preferences();
 }
