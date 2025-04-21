@@ -11,9 +11,10 @@ WorkFlowGo is a comprehensive interview tracking system designed to help job see
 
 - **Interview Management**: Create, update, and track interviews with detailed information
 - **Document Storage**: Upload and manage documents like resumes and cover letters using Cloudinary
-- **Statistics**: Get insights into your interview process with comprehensive statistics
+- **Email Notifications**: Receive timely reminders and updates about your interviews
+- **Statistics Dashboard**: Get insights into your interview process with comprehensive statistics
 - **User Settings**: Customize your experience with personalized settings
-- **Security**: Basic authentication to protect your data
+- **Security**: OAuth2 and JWT authentication to protect your data
 - **Caching**: Improved performance with intelligent caching
 - **Rate Limiting**: Protection against API abuse
 - **Request Logging**: Comprehensive logging for debugging and monitoring
@@ -29,6 +30,7 @@ WorkFlowGo is a comprehensive interview tracking system designed to help job see
 - **Spring Data JPA**: Data access layer
 - **PostgreSQL 16**: Relational database for data persistence
 - **Cloudinary**: Cloud-based document storage
+- **JavaMail API**: Email service integration
 - **Swagger/OpenAPI**: API documentation
 - **Spring Security with OAuth2**: Authentication and authorization
 - **JWT**: Token-based authentication
@@ -46,6 +48,8 @@ WorkFlowGo is a comprehensive interview tracking system designed to help job see
 - **Service Layer**: Business logic encapsulation
 - **Caching**: Optimized performance with strategic caching
 - **Unit & Integration Tests**: Comprehensive test coverage
+- **Type Converters**: Custom type converters for complex data types
+- **Validation**: Input validation using Bean Validation API
 
 ## Getting Started
 
@@ -60,7 +64,7 @@ WorkFlowGo is a comprehensive interview tracking system designed to help job see
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/work-flow-go-server.git
+   git clone https://github.com/yaiiow159/work-flow-go-server.git
    cd work-flow-go-server
    ```
 
@@ -149,6 +153,8 @@ This application is configured for deployment on Render using Docker. Follow the
      - `CLOUDINARY_API_SECRET`: Your Cloudinary API secret
      - `FRONTEND_URL`: URL of your frontend application
      - `ALLOWED_ORIGINS`: Comma-separated list of allowed origins for CORS
+     - `MAIL_USERNAME`: Email service username
+     - `MAIL_PASSWORD`: Email service password
 
 5. **Deploy**: Click "Create Web Service" and Render will build and deploy your application.
 
@@ -157,7 +163,7 @@ This application is configured for deployment on Render using Docker. Follow the
 
 The application will be available at `https://your-render-service-name.onrender.com/api`.
 
-### API Documentation
+## API Documentation
 
 Once the application is running, you can access the Swagger UI at:
 ```
@@ -166,9 +172,9 @@ http://localhost:8001/api/swagger-ui.html
 
 This provides a comprehensive documentation of all available endpoints.
 
-### Configuration
+## Configuration
 
-#### Google OAuth2 Configuration
+### Google OAuth2 Configuration
 
 To enable Google OAuth2 authentication, you need to configure the following environment variables:
 
@@ -186,7 +192,7 @@ You can obtain these credentials by creating a project in the [Google Developer 
    - `http://localhost:8081/api/oauth2/callback/google` (for development)
    - `https://your-production-domain.com/api/oauth2/callback/google` (for production)
 
-#### Cloudinary Configuration
+### Cloudinary Configuration
 
 For document storage, you need to configure Cloudinary:
 
@@ -198,7 +204,22 @@ CLOUDINARY_API_SECRET=your-api-secret
 
 You can obtain these credentials by creating an account on [Cloudinary](https://cloudinary.com/).
 
-#### JWT Configuration
+### Email Configuration
+
+For email notifications, configure the following environment variables:
+
+```
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
+MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+```
+
+For Gmail, you'll need to generate an App Password if you have 2FA enabled.
+
+### JWT Configuration
 
 For JWT token generation and validation:
 

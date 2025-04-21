@@ -73,7 +73,7 @@ public class Interview {
     @ToString.Exclude
     private List<Question> questions = new ArrayList<>();
     
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "interview_documents",
         joinColumns = @JoinColumn(name = "interview_id"),
