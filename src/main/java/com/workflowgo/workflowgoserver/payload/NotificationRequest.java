@@ -22,5 +22,5 @@ public class NotificationRequest {
     
     private String relatedEntityId;
     
-    private RelatedEntityType relatedEntityType;
+    private String relatedEntityType;
 }

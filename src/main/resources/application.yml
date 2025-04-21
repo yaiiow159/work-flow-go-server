@@ -48,9 +48,9 @@ server:
     context-path: /api
 
 cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME:dh4rfryvq}
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:dl4nfjvva}
   api-key: ${CLOUDINARY_API_KEY:273528986331944}
-  api-secret: ${CLOUDINARY_API_SECRET:FOqHrApkNVQTlmhBEUYBsrL4zE}
+  api-secret: ${CLOUDINARY_API_SECRET:F0qHrApkNVOTIm1t6EUY8sH_fxE}
   secure: true
 
 logging:

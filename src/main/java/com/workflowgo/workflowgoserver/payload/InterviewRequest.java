@@ -24,10 +24,10 @@ public class InterviewRequest {
     private LocalTime time;
     
     @NotNull(message = "Type is required")
-    private InterviewType type;
+    private String type;
     
     @NotNull(message = "Status is required")
-    private InterviewStatus status;
+    private String status;
     
     private String location;
     

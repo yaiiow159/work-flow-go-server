@@ -1,5 +1,10 @@
 # WorkFlowGo Interview Tracking System
 
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.10-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://www.docker.com/)
+
 WorkFlowGo is a comprehensive interview tracking system designed to help job seekers manage their interview process efficiently. This repository contains the backend server implementation built with Spring Boot.
 
 ## Features
@@ -15,6 +20,7 @@ WorkFlowGo is a comprehensive interview tracking system designed to help job see
 - **Docker Support**: Easy deployment with Docker and Docker Compose
 - **Google OAuth2 Authentication**: Secure authentication with Google OAuth2
 - **JWT Token-Based Authentication**: Token-based authentication for secure API access
+- **RESTful API**: Well-designed API following REST principles
 
 ## Technology Stack
 
@@ -28,6 +34,7 @@ WorkFlowGo is a comprehensive interview tracking system designed to help job see
 - **JWT**: Token-based authentication
 - **Spring Cache (Caffeine)**: High-performance caching
 - **Docker & Docker Compose**: Containerization and deployment
+- **Maven**: Dependency management and build tool
 
 ## Code Quality & Best Practices
 
@@ -38,6 +45,7 @@ WorkFlowGo is a comprehensive interview tracking system designed to help job see
 - **Repository Pattern**: Separation of data access logic
 - **Service Layer**: Business logic encapsulation
 - **Caching**: Optimized performance with strategic caching
+- **Unit & Integration Tests**: Comprehensive test coverage
 
 ## Getting Started
 
@@ -46,6 +54,7 @@ WorkFlowGo is a comprehensive interview tracking system designed to help job see
 - Java 21 or higher
 - Maven 3.6 or higher
 - PostgreSQL 16 or higher
+- Docker (optional, for containerized deployment)
 
 ### Installation and Setup
 
@@ -200,51 +209,39 @@ JWT_EXPIRATION=864000000
 
 The JWT_EXPIRATION is in milliseconds (default: 10 days).
 
-### API Endpoints
+## Project Structure
 
-### Interviews
+```
+src/main/java/com/workflowgo/workflowgoserver/
+├── config/                  # Configuration classes
+├── controller/              # REST controllers
+├── dto/                     # Data Transfer Objects
+├── exception/               # Custom exceptions and handlers
+├── model/                   # Entity classes
+├── repository/              # JPA repositories
+├── security/                # Security configurations
+├── service/                 # Business logic services
+└── WorkflowGoServerApplication.java  # Main application class
+```
 
-- `GET /interviews`: Get all interviews with optional filtering
-- `GET /interviews/{id}`: Get a specific interview by ID
-- `POST /interviews`: Create a new interview
-- `PUT /interviews/{id}`: Update an existing interview
-- `PATCH /interviews/{id}/status`: Update only the status of an interview
-- `DELETE /interviews/{id}`: Delete an interview
+## Contributing
 
-### Documents
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-- `GET /documents`: Get all documents
-- `GET /documents/{id}`: Get document metadata by ID
-- `POST /documents`: Upload a new document
-- `DELETE /documents/{id}`: Delete a document
-
-### User Settings
-
-- `GET /user/settings`: Get user settings
-- `PUT /user/settings`: Update user settings
-- `POST /user/settings/reset`: Reset user settings to defaults
-- `GET /user/export`: Export all user data
-
-### Statistics
-
-- `GET /statistics/interviews`: Get interview statistics
-
-### Authentication Flow
-
-1. **Google OAuth2 Login**:
-   - Frontend redirects to `/api/oauth2/authorize/google`
-   - User authenticates with Google
-   - Google redirects back to `/api/oauth2/callback/google`
-   - Backend generates JWT token and redirects to frontend with token
-
-2. **JWT Authentication**:
-   - Include the JWT token in the Authorization header:
-   ```
-   Authorization: Bearer your-jwt-token
-   ```
-   - The token is validated on each request
-   - The token contains the user ID which is used to authorize access to resources
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+For any questions or suggestions, please open an issue in the GitHub repository.
+
+---
+
+Last updated: April 21, 2025

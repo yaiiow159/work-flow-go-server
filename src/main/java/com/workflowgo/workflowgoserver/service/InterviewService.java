@@ -7,6 +7,7 @@ import com.workflowgo.workflowgoserver.model.ContactPerson;
 import com.workflowgo.workflowgoserver.model.Interview;
 import com.workflowgo.workflowgoserver.model.User;
 import com.workflowgo.workflowgoserver.model.enums.InterviewStatus;
+import com.workflowgo.workflowgoserver.model.enums.InterviewType;
 import com.workflowgo.workflowgoserver.payload.InterviewRequest;
 import com.workflowgo.workflowgoserver.repository.InterviewRepository;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
@@ -36,16 +37,18 @@ public class InterviewService {
         this.eventPublisher = eventPublisher;
     }
 
-    public List<Interview> getInterviews(Long userId, InterviewStatus status, LocalDate from, LocalDate to,
+    public List<Interview> getInterviews(Long userId, String status, LocalDate from, LocalDate to,
                                          String company, String sort, String order) {
         
         Sort.Direction direction = "desc".equalsIgnoreCase(order) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sortObj = Sort.by(direction, sort);
         
         List<Interview> interviews = interviewRepository.findByUserId(userId, sortObj);
+
+        InterviewStatus interviewStatus = status == null ? null : InterviewStatus.fromString(status);
         
         return interviews.stream()
-                .filter(i -> status == null || i.getStatus() == status)
+                .filter(i -> status == null || i.getStatus() == interviewStatus)
                 .filter(i -> from == null || !i.getDate().isBefore(from))
                 .filter(i -> to == null || !i.getDate().isAfter(to))
                 .filter(i -> company == null || i.getCompanyName().toLowerCase().contains(company.toLowerCase()))
@@ -157,8 +160,17 @@ public class InterviewService {
         interview.setPosition(request.getPosition());
         interview.setDate(request.getDate());
         interview.setTime(request.getTime());
-        interview.setType(request.getType());
-        interview.setStatus(request.getStatus());
+
+        if(request.getStatus() != null) {
+            InterviewStatus status = InterviewStatus.fromString(request.getStatus());
+            interview.setStatus(status);
+        }
+
+        if(request.getType() != null) {
+            InterviewType type = InterviewType.fromString(request.getType());
+            interview.setType(type);
+        }
+
         interview.setLocation(request.getLocation());
         interview.setNotes(request.getNotes());
         

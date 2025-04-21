@@ -8,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,10 +23,11 @@ public class CloudinaryService {
 
     public String uploadFile(MultipartFile file) {
         try {
-            String fileName = generateFileName(file.getOriginalFilename());
-            Map uploadResult = cloudinary.uploader().upload(
+            Map<?,?> uploadResult = cloudinary.uploader().upload(
                     file.getBytes(),
-                    ObjectUtils.asMap("resource_type", "auto")
+                    ObjectUtils.asMap(
+                            "resource_type", "auto"
+                    )
             );
             return (String) uploadResult.get("secure_url");
         } catch (IOException e) {
@@ -36,13 +36,15 @@ public class CloudinaryService {
     }
 
     public void deleteFile(String fileUrl) {
+        String publicId = extractPublicIdFromUrl(fileUrl);
+        if (publicId == null) {
+            throw new FileStorageException("Could not extract public ID from URL: " + fileUrl);
+        }
         try {
-            String publicId = extractPublicIdFromUrl(fileUrl);
-            if (publicId != null) {
-                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-            } else {
-                throw new FileStorageException("Could not extract public ID from URL: " + fileUrl);
-            }
+            cloudinary.uploader().destroy(
+                    publicId,
+                    ObjectUtils.asMap("resource_type", "auto")
+            );
         } catch (IOException e) {
             throw new FileStorageException("Failed to delete file from Cloudinary", e);
         }
@@ -52,7 +54,6 @@ public class CloudinaryService {
         if (url == null || url.isEmpty()) {
             return null;
         }
-        
         Matcher matcher = PUBLIC_ID_PATTERN.matcher(url);
         if (matcher.find()) {
             return matcher.group(1);
@@ -60,14 +61,4 @@ public class CloudinaryService {
         return null;
     }
 
-    private String generateFileName(String originalFileName) {
-        return UUID.randomUUID().toString() + getFileExtension(originalFileName);
-    }
-
-    private String getFileExtension(String fileName) {
-        if (fileName == null || fileName.lastIndexOf(".") == -1) {
-            return "";
-        }
-        return fileName.substring(fileName.lastIndexOf("."));
-    }
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class UserProfileDTO {
-    private String id;
+    private Long id;
     private String name;
     private String email;
     private String bio;
@@ -14,11 +14,10 @@ public class UserProfileDTO {
     private String company;
     private String position;
     private String photoURL;
-    private UserPreferencesProfileDTO preferences;
-    
+
     public static UserProfileDTO fromUser(User user) {
         UserProfileDTO dto = new UserProfileDTO();
-        dto.setId(user.getId().toString());
+        dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
         dto.setBio(user.getBio() != null ? user.getBio() : "");
@@ -27,7 +26,6 @@ public class UserProfileDTO {
         dto.setCompany(user.getCompany() != null ? user.getCompany() : "");
         dto.setPosition(user.getPosition() != null ? user.getPosition() : "");
         dto.setPhotoURL(user.getPhotoURL());
-        dto.setPreferences(UserPreferencesProfileDTO.fromUserPreferences(user.getPreferences()));
         return dto;
     }
 }

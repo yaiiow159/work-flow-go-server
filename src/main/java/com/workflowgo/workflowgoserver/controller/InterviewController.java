@@ -33,7 +33,7 @@ public class InterviewController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<InterviewDTO>> getInterviews(
             @CurrentUser UserPrincipal currentUser,
-            @RequestParam(required = false) InterviewStatus status,
+            @RequestParam(required = false) String status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @RequestParam(required = false) String company,

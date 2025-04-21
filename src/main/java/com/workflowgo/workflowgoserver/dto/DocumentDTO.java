@@ -4,6 +4,7 @@ import com.workflowgo.workflowgoserver.model.Document;
 import com.workflowgo.workflowgoserver.model.enums.DocumentType;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,7 +17,7 @@ public class DocumentDTO {
     private String url;
     private String contentType;
     private Long size;
-    private ZonedDateTime createdAt;
+    private LocalDateTime createdAt;
     
     public static DocumentDTO fromDocument(Document document) {
         if (document == null) {

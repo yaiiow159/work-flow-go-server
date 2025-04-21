@@ -1,15 +1,11 @@
 package com.workflowgo.workflowgoserver.controller;
 
-import com.workflowgo.workflowgoserver.dto.UserDTO;
-import com.workflowgo.workflowgoserver.dto.UserInfoDTO;
-import com.workflowgo.workflowgoserver.dto.UserSettingsDTO;
+import com.workflowgo.workflowgoserver.dto.*;
 import com.workflowgo.workflowgoserver.payload.PasswordChangeRequest;
-import com.workflowgo.workflowgoserver.payload.UserSettingsRequest;
 import com.workflowgo.workflowgoserver.security.CurrentUser;
 import com.workflowgo.workflowgoserver.security.UserPrincipal;
 import com.workflowgo.workflowgoserver.service.AuthService;
 import com.workflowgo.workflowgoserver.service.UserProfileService;
-import com.workflowgo.workflowgoserver.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,37 +18,35 @@ import java.io.IOException;
 @RequestMapping("/users/profile")
 public class UserProfileController {
 
-    private final UserService userService;
     private final AuthService authService;
     private final UserProfileService userProfileService;
 
-    public UserProfileController(UserService userService, AuthService authService, UserProfileService userProfileService) {
-        this.userService = userService;
+    public UserProfileController( AuthService authService, UserProfileService userProfileService) {
         this.authService = authService;
         this.userProfileService = userProfileService;
     }
 
     @GetMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserDTO> getCurrentUser(@CurrentUser UserPrincipal userPrincipal) {
-        return ResponseEntity.ok(UserDTO.fromUser(userService.getUserById(userPrincipal.getId())));
+    public ResponseEntity<UserProfileDTO> getCurrentUserProfile(@CurrentUser UserPrincipal userPrincipal) {
+        return ResponseEntity.ok(userProfileService.getUserProfile(userPrincipal.getId()));
     }
 
     @PutMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserInfoDTO> updateUserProfile(
+    public ResponseEntity<UserProfileDTO> updateUserProfile(
             @CurrentUser UserPrincipal userPrincipal,
-            @RequestBody UserSettingsRequest userSettingsRequest) {
-        UserInfoDTO userInfoDTO = userProfileService.updateUserProfile(userPrincipal.getId(), userSettingsRequest);
-        return ResponseEntity.ok(userInfoDTO);
+            @RequestBody UserProfileRequest userProfileRequest) {
+        UserProfileDTO userProfileDTO = userProfileService.updateUserProfile(userPrincipal.getId(), userProfileRequest);
+        return ResponseEntity.ok(userProfileDTO);
     }
 
     @PostMapping("/profile-image")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserSettingsDTO> uploadProfileImage(
+    public ResponseEntity<String> uploadProfileImage(
             @RequestParam("file") MultipartFile file,
             @CurrentUser UserPrincipal currentUser) throws IOException {
-        return ResponseEntity.ok(userProfileService.updateProfileImageAndReturnSettings(currentUser.getId(), file));
+        return ResponseEntity.ok(userProfileService.updateProfileImage(currentUser.getId(), file));
     }
     
     @PostMapping("/change-password")

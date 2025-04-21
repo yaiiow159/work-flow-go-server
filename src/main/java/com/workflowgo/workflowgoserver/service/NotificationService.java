@@ -62,9 +62,11 @@ public class NotificationService {
 
     @Transactional
     public NotificationDTO createNotification(Long userId, String title, String message, String type, 
-                                             String relatedEntityId, RelatedEntityType relatedEntityType) {
+                                             String relatedEntityId, String relatedEntityType) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        RelatedEntityType parsedRelatedEntityType = RelatedEntityType.valueOf(relatedEntityType);
         
         Notification notification = new Notification();
         notification.setUser(user);
@@ -74,7 +76,7 @@ public class NotificationService {
         notification.setRead(false);
         notification.setCreatedAt(ZonedDateTime.now());
         notification.setRelatedEntityId(relatedEntityId);
-        notification.setRelatedEntityType(relatedEntityType);
+        notification.setRelatedEntityType(parsedRelatedEntityType);
         
         notification = notificationRepository.save(notification);
         

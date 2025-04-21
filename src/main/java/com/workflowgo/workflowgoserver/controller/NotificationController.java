@@ -1,6 +1,7 @@
 package com.workflowgo.workflowgoserver.controller;
 
 import com.workflowgo.workflowgoserver.dto.NotificationDTO;
+import com.workflowgo.workflowgoserver.model.enums.RelatedEntityType;
 import com.workflowgo.workflowgoserver.payload.NotificationRequest;
 import com.workflowgo.workflowgoserver.security.CurrentUser;
 import com.workflowgo.workflowgoserver.security.UserPrincipal;
@@ -8,6 +9,7 @@ import com.workflowgo.workflowgoserver.service.NotificationService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +43,12 @@ public class NotificationController {
     public ResponseEntity<NotificationDTO> createNotification(
             @CurrentUser UserPrincipal userPrincipal,
             @Valid @RequestBody NotificationRequest request) {
+
+        if(StringUtils.hasText(request.getRelatedEntityType())) {
+            RelatedEntityType relatedEntityType = RelatedEntityType.fromString(request.getRelatedEntityType());
+            request.setRelatedEntityType(relatedEntityType.getValue());
+        }
+
         NotificationDTO notification = notificationService.createNotification(
                 userPrincipal.getId(),
                 request.getTitle(),

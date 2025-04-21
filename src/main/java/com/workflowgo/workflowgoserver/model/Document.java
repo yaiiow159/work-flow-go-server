@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -37,7 +38,7 @@ public class Document {
     private Long size;
     
     @CreationTimestamp
-    private ZonedDateTime createdAt;
+    private LocalDateTime createdAt;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

@@ -54,20 +54,20 @@ public class UserService {
         user.setLocation(settingsRequest.getLocation());
         user.setCompany(settingsRequest.getCompany());
         user.setPosition(settingsRequest.getPosition());
-        
+
         UserPreferences preferences = user.getPreferences();
         if (preferences == null) {
             preferences = new UserPreferences();
             user.setPreferences(preferences);
         }
-        
+
         preferences.setDarkMode(settingsRequest.isDarkMode());
         preferences.setPrimaryColor(settingsRequest.getPrimaryColor());
         preferences.setEmailNotifications(settingsRequest.isEmailNotifications());
         preferences.setReminderTime(settingsRequest.getReminderTime());
         preferences.setDefaultView(settingsRequest.getDefaultView());
         preferences.setCompactMode(settingsRequest.isCompactMode());
-        
+
         return userRepository.save(user);
     }
 

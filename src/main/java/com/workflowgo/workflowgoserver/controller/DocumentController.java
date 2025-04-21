@@ -41,7 +41,7 @@ public class DocumentController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> uploadDocument(
+    public ResponseEntity<?> uploadDocumentFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam("name") String name,
             @RequestParam("type") String type,
