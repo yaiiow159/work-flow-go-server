@@ -1,9 +1,11 @@
 package com.workflowgo.workflowgoserver.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.workflowgo.workflowgoserver.model.User;
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserProfileDTO {
     private Long id;
     private String name;

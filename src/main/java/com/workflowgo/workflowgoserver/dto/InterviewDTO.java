@@ -1,5 +1,6 @@
 package com.workflowgo.workflowgoserver.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.workflowgo.workflowgoserver.model.Document;
 import com.workflowgo.workflowgoserver.model.Interview;
 import com.workflowgo.workflowgoserver.model.enums.InterviewStatus;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InterviewDTO {
     private Long id;
     private String companyName;

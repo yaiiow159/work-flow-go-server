@@ -1,5 +1,6 @@
 package com.workflowgo.workflowgoserver.model;
 
+import com.workflowgo.workflowgoserver.model.converter.DocumentTypeConverter;
 import com.workflowgo.workflowgoserver.model.enums.DocumentType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,8 +27,8 @@ public class Document {
     
     @Column(nullable = false)
     private String name;
-    
-    @Enumerated(EnumType.STRING)
+
+    @Convert(converter = DocumentTypeConverter.class)
     private DocumentType type;
     
     @Column(nullable = false)
@@ -38,7 +39,7 @@ public class Document {
     private Long size;
     
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

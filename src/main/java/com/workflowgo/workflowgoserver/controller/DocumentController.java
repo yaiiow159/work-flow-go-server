@@ -6,19 +6,12 @@ import com.workflowgo.workflowgoserver.payload.ApiResponse;
 import com.workflowgo.workflowgoserver.security.CurrentUser;
 import com.workflowgo.workflowgoserver.security.UserPrincipal;
 import com.workflowgo.workflowgoserver.service.DocumentService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 
 @Slf4j
@@ -50,12 +43,7 @@ public class DocumentController {
         Document document = documentService.storeDocument(file, name, type, currentUser.getId());
         DocumentDTO documentDTO = DocumentDTO.fromDocument(document);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{id}")
-                .buildAndExpand(document.getId()).toUri();
-
-        return ResponseEntity.created(location)
-                .body(documentDTO);
+        return ResponseEntity.ok(documentDTO);
     }
     
     @GetMapping("/{id}")
@@ -67,21 +55,9 @@ public class DocumentController {
     
     @GetMapping("/{id}/download")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Resource> downloadDocument(@PathVariable Long id, @CurrentUser UserPrincipal currentUser, HttpServletRequest request) throws IOException {
-        Resource resource = documentService.loadDocumentAsResource(id, currentUser.getId());
-        
-        String contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-        
-        if(contentType == null) {
-            contentType = "application/octet-stream";
-        }
-        
+    public ResponseEntity<?> downloadDocument(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
         Document document = documentService.getDocumentById(id, currentUser.getId());
-        
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getName() + "\"")
-                .body(resource);
+        return ResponseEntity.ok(document.getUrl());
     }
     
     @DeleteMapping("/{id}")
@@ -112,28 +88,8 @@ public class DocumentController {
     
     @GetMapping("/{id}/view")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Resource> viewDocument(
-            @PathVariable Long id,
-            @CurrentUser UserPrincipal currentUser,
-            HttpServletRequest request) {
-        
-        Resource resource = documentService.loadDocumentAsResource(id, currentUser.getId());
-
-        String contentType = null;
-        try {
-            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-        } catch (IOException ex) {
-            log.error("Failed to determine file type", ex);
-            contentType = "application/octet-stream";
-        }
-
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline", "filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
+    public ResponseEntity<?> viewDocument(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
+        Document document = documentService.getDocumentById(id, currentUser.getId());
+        return ResponseEntity.ok(document.getUrl());
     }
 }

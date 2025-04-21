@@ -1,7 +1,7 @@
 package com.workflowgo.workflowgoserver.payload;
 
-import com.workflowgo.workflowgoserver.model.enums.InterviewStatus;
-import com.workflowgo.workflowgoserver.model.enums.InterviewType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -10,7 +10,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InterviewRequest {
+
+    @JsonIgnore
+    private Long id;
+
     @NotBlank(message = "Company name is required")
     private String companyName;
     

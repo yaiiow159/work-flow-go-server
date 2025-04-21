@@ -4,11 +4,17 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum QuestionCategory {
-    TECHNICAL,
-    BEHAVIORAL,
-    COMPANY,
-    ROLE,
-    OTHER;
+    TECHNICAL("technical"),
+    BEHAVIORAL("behavioral"),
+    COMPANY("company"),
+    ROLE("role"),
+    OTHER("other");
+
+    private final String value;
+
+    QuestionCategory(String value) {
+        this.value = value;
+    }
 
     @JsonCreator
     public static QuestionCategory fromString(String value) {
@@ -17,7 +23,7 @@ public enum QuestionCategory {
         }
 
         for (QuestionCategory category : QuestionCategory.values()) {
-            if (category.name().equalsIgnoreCase(value)) {
+            if (category.getValue().equalsIgnoreCase(value)) {
                 return category;
             }
         }
@@ -26,6 +32,6 @@ public enum QuestionCategory {
 
     @JsonValue
     public String getValue() {
-        return this.name();
+        return this.value;
     }
 }

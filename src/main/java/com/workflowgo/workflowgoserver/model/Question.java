@@ -1,5 +1,6 @@
 package com.workflowgo.workflowgoserver.model;
 
+import com.workflowgo.workflowgoserver.model.converter.QuestionCategoryConverter;
 import com.workflowgo.workflowgoserver.model.enums.QuestionCategory;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,7 +26,7 @@ public class Question {
     @Column(length = 2000)
     private String answer;
     
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = QuestionCategoryConverter.class)
     private QuestionCategory category;
     
     private boolean isImportant;

@@ -4,11 +4,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum DocumentType {
-    RESUME,
-    COVER_LETTER,
-    OFFER_LETTER,
-    CONTRACT,
-    OTHER;
+    RESUME("resume"),
+    COVER_LETTER("cover_letter"),
+    PORTFOLIO("portfolio"),
+    OTHER("other");
+
+    private final String value;
+
+    DocumentType(String value) {
+        this.value = value;
+    }
 
     @JsonCreator
     public static DocumentType fromString(String value) {
@@ -17,7 +22,7 @@ public enum DocumentType {
         }
         
         for (DocumentType type : DocumentType.values()) {
-            if (type.name().equalsIgnoreCase(value)) {
+            if (type.getValue().equalsIgnoreCase(value)) {
                 return type;
             }
         }
@@ -26,6 +31,6 @@ public enum DocumentType {
 
     @JsonValue
     public String getValue() {
-        return this.name();
+        return this.value;
     }
 }

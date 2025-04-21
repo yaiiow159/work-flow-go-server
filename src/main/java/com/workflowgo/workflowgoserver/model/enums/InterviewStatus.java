@@ -4,11 +4,17 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum InterviewStatus {
-    SCHEDULED,
-    CONFIRMED,
-    COMPLETED,
-    REJECTED,
-    CANCELLED;
+    SCHEDULED("scheduled"),
+    CONFIRMED("confirmed"),
+    COMPLETED("completed"),
+    REJECTED("rejected"),
+    CANCELLED("cancelled");
+
+    private final String value;
+
+    InterviewStatus(String value) {
+        this.value = value;
+    }
 
     @JsonCreator
     public static InterviewStatus fromString(String value) {
@@ -17,7 +23,7 @@ public enum InterviewStatus {
         }
         
         for (InterviewStatus status : InterviewStatus.values()) {
-            if (status.name().equalsIgnoreCase(value)) {
+            if (status.getValue().equalsIgnoreCase(value)) {
                 return status;
             }
         }
@@ -26,6 +32,6 @@ public enum InterviewStatus {
 
     @JsonValue
     public String getValue() {
-        return this.name();
+        return this.value;
     }
 }

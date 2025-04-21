@@ -1,14 +1,18 @@
 package com.workflowgo.workflowgoserver.service;
 
+import com.workflowgo.workflowgoserver.dto.InterviewDTO;
+import com.workflowgo.workflowgoserver.dto.QuestionDTO;
 import com.workflowgo.workflowgoserver.event.InterviewEvent;
-import com.workflowgo.workflowgoserver.event.InterviewEventListener;
 import com.workflowgo.workflowgoserver.exception.ResourceNotFoundException;
 import com.workflowgo.workflowgoserver.model.ContactPerson;
+import com.workflowgo.workflowgoserver.model.Document;
 import com.workflowgo.workflowgoserver.model.Interview;
+import com.workflowgo.workflowgoserver.model.Question;
 import com.workflowgo.workflowgoserver.model.User;
 import com.workflowgo.workflowgoserver.model.enums.InterviewStatus;
 import com.workflowgo.workflowgoserver.model.enums.InterviewType;
 import com.workflowgo.workflowgoserver.payload.InterviewRequest;
+import com.workflowgo.workflowgoserver.repository.DocumentRepository;
 import com.workflowgo.workflowgoserver.repository.InterviewRepository;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,13 +34,16 @@ public class InterviewService {
 
     private final InterviewRepository interviewRepository;
     private final UserRepository userRepository;
+    private final DocumentRepository documentRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     public InterviewService(InterviewRepository interviewRepository, 
                            UserRepository userRepository,
-                            ApplicationEventPublisher eventPublisher) {
+                           DocumentRepository documentRepository,
+                           ApplicationEventPublisher eventPublisher) {
         this.interviewRepository = interviewRepository;
         this.userRepository = userRepository;
+        this.documentRepository = documentRepository;
         this.eventPublisher = eventPublisher;
     }
 
@@ -56,12 +66,12 @@ public class InterviewService {
     }
 
     @Transactional
-    public Interview createInterview(InterviewRequest interviewRequest, Long userId) {
+    public Interview createInterview(InterviewDTO interviewRequest, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         Interview interview = new Interview();
-        updateInterviewFromRequest(interview, interviewRequest);
+        updateInterviewFromRequest(interview, interviewRequest, userId);
         interview.setUser(user);
         
         Interview savedInterview = interviewRepository.save(interview);
@@ -80,13 +90,13 @@ public class InterviewService {
     }
 
     @Transactional
-    public Interview updateInterview(Long interviewId, InterviewRequest interviewRequest, Long userId) {
+    public Interview updateInterview(Long interviewId, InterviewDTO interviewRequest, Long userId) {
         Interview interview = getInterviewById(interviewId, userId);
         User user = interview.getUser();
         
         InterviewStatus oldStatus = interview.getStatus();
         
-        updateInterviewFromRequest(interview, interviewRequest);
+        updateInterviewFromRequest(interview, interviewRequest, userId);
         Interview updatedInterview = interviewRepository.save(interview);
         
         if (user.getPreferences() != null && user.getPreferences().isEmailNotifications()) {
@@ -155,33 +165,61 @@ public class InterviewService {
         }
     }
 
-    private void updateInterviewFromRequest(Interview interview, InterviewRequest request) {
+    private void updateInterviewFromRequest(Interview interview, InterviewDTO request, Long userId) {
         interview.setCompanyName(request.getCompanyName());
         interview.setPosition(request.getPosition());
         interview.setDate(request.getDate());
         interview.setTime(request.getTime());
-
-        if(request.getStatus() != null) {
-            InterviewStatus status = InterviewStatus.fromString(request.getStatus());
-            interview.setStatus(status);
-        }
-
-        if(request.getType() != null) {
-            InterviewType type = InterviewType.fromString(request.getType());
-            interview.setType(type);
-        }
-
         interview.setLocation(request.getLocation());
         interview.setNotes(request.getNotes());
-        
-        ContactPerson contactPerson = new ContactPerson();
-        contactPerson.setName(request.getContactName());
-        contactPerson.setPosition(request.getContactPosition());
-        contactPerson.setEmail(request.getContactEmail());
-        contactPerson.setPhone(request.getContactPhone());
-        interview.setContactPerson(contactPerson);
-        
+        interview.setType(request.getType());
+        interview.setStatus(request.getStatus());
         interview.setRating(request.getRating());
         interview.setFeedback(request.getFeedback());
+        
+        if (request.getContactPerson() != null) {
+            ContactPerson contactPerson = new ContactPerson();
+            contactPerson.setName(request.getContactPerson().getName());
+            contactPerson.setPosition(request.getContactPerson().getPosition());
+            contactPerson.setEmail(request.getContactPerson().getEmail());
+            contactPerson.setPhone(request.getContactPerson().getPhone());
+            interview.setContactPerson(contactPerson);
+        }
+
+        if (request.getQuestions() != null) {
+            interview.getQuestions().clear();
+            
+            for (QuestionDTO questionDTO : request.getQuestions()) {
+                Question question = new Question();
+                
+                if (questionDTO.getId() != null && !questionDTO.getId().isEmpty()) {
+                    try {
+                        Long questionId = Long.parseLong(questionDTO.getId());
+                        question.setId(questionId);
+                    } catch (NumberFormatException e) {
+                        log.debug("Non-numeric question ID received: {}, will be auto-generated", questionDTO.getId());
+                    }
+                }
+                
+                question.setQuestion(questionDTO.getQuestion());
+                question.setAnswer(questionDTO.getAnswer());
+                question.setCategory(questionDTO.getCategory());
+                question.setImportant(questionDTO.isImportant());
+                question.setInterview(interview);
+                interview.getQuestions().add(question);
+            }
+        }
+
+        if (request.getDocumentIds() != null && !request.getDocumentIds().isEmpty()) {
+            Set<Document> documents = new HashSet<>();
+            for (Long documentId : request.getDocumentIds()) {
+                Document document = documentRepository.findByIdAndUserId(documentId, userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Document", "id", documentId));
+                documents.add(document);
+            }
+            interview.setDocuments(documents);
+        } else {
+            interview.getDocuments().clear();
+        }
     }
 }

@@ -43,7 +43,7 @@ public class CloudinaryService {
         try {
             cloudinary.uploader().destroy(
                     publicId,
-                    ObjectUtils.asMap("resource_type", "auto")
+                    ObjectUtils.asMap("resource_type", "image")
             );
         } catch (IOException e) {
             throw new FileStorageException("Failed to delete file from Cloudinary", e);

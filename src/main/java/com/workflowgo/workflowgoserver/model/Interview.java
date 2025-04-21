@@ -1,5 +1,7 @@
 package com.workflowgo.workflowgoserver.model;
 
+import com.workflowgo.workflowgoserver.model.converter.InterviewStatusConverter;
+import com.workflowgo.workflowgoserver.model.converter.InterviewTypeConverter;
 import com.workflowgo.workflowgoserver.model.enums.InterviewStatus;
 import com.workflowgo.workflowgoserver.model.enums.InterviewType;
 import jakarta.persistence.*;
@@ -36,11 +38,11 @@ public class Interview {
     
     @Column(nullable = false)
     private LocalTime time;
-    
-    @Enumerated(EnumType.STRING)
+
+    @Convert(converter = InterviewTypeConverter.class)
     private InterviewType type;
-    
-    @Enumerated(EnumType.STRING)
+
+    @Convert(converter = InterviewStatusConverter.class)
     private InterviewStatus status;
     
     private String location;

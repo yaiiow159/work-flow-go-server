@@ -4,9 +4,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum InterviewType {
-    REMOTE,
-    ONSITE,
-    PHONE;
+    REMOTE("remote"),
+    ONSITE("onsite"),
+    PHONE("phone");
+
+    private final String value;
+
+    InterviewType(String value) {
+        this.value = value;
+    }
 
     @JsonCreator
     public static InterviewType fromString(String value) {
@@ -15,7 +21,7 @@ public enum InterviewType {
         }
         
         for (InterviewType type : InterviewType.values()) {
-            if (type.name().equalsIgnoreCase(value)) {
+            if (type.getValue().equalsIgnoreCase(value)) {
                 return type;
             }
         }
@@ -24,6 +30,6 @@ public enum InterviewType {
 
     @JsonValue
     public String getValue() {
-        return this.name();
+        return this.value;
     }
 }

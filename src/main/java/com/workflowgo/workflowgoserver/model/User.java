@@ -35,7 +35,7 @@ public class User {
     private Boolean emailVerified = false;
     
     private String password;
-    
+
     @Enumerated(EnumType.STRING)
     private AuthProvider provider;
     

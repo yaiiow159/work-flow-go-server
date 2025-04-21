@@ -2,20 +2,18 @@ package com.workflowgo.workflowgoserver.controller;
 
 import com.workflowgo.workflowgoserver.dto.InterviewDTO;
 import com.workflowgo.workflowgoserver.model.Interview;
-import com.workflowgo.workflowgoserver.model.enums.InterviewStatus;
-import com.workflowgo.workflowgoserver.payload.InterviewRequest;
+import com.workflowgo.workflowgoserver.payload.ApiResponse;
 import com.workflowgo.workflowgoserver.payload.StatusUpdateRequest;
 import com.workflowgo.workflowgoserver.security.CurrentUser;
 import com.workflowgo.workflowgoserver.security.UserPrincipal;
 import com.workflowgo.workflowgoserver.service.InterviewService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -46,48 +44,68 @@ public class InterviewController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<InterviewDTO> createInterview(@Valid @RequestBody InterviewRequest interviewRequest,
+    public ResponseEntity<?> createInterview(@Valid @RequestBody InterviewDTO interviewRequest,
                                            @CurrentUser UserPrincipal currentUser) {
-        Interview interview = interviewService.createInterview(interviewRequest, currentUser.getId());
-        InterviewDTO interviewDTO = InterviewDTO.fromInterview(interview);
-
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{id}")
-                .buildAndExpand(interview.getId()).toUri();
-
-        return ResponseEntity.created(location)
-                .body(interviewDTO);
+        try {
+            Interview interview = interviewService.createInterview(interviewRequest, currentUser.getId());
+            InterviewDTO interviewDTO = InterviewDTO.fromInterview(interview);
+            
+            return ResponseEntity.ok(interviewDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(false, "Failed to create interview: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<InterviewDTO> getInterviewById(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
-        Interview interview = interviewService.getInterviewById(id, currentUser.getId());
-        return ResponseEntity.ok(InterviewDTO.fromInterview(interview));
+    public ResponseEntity<?> getInterviewById(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
+        try {
+            Interview interview = interviewService.getInterviewById(id, currentUser.getId());
+            return ResponseEntity.ok(InterviewDTO.fromInterview(interview));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse(false, "Interview not found: " + e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<InterviewDTO> updateInterview(@PathVariable Long id,
-                                   @Valid @RequestBody InterviewRequest interviewRequest,
+    public ResponseEntity<?> updateInterview(@PathVariable Long id,
+                                   @Valid @RequestBody InterviewDTO interviewRequest,
                                    @CurrentUser UserPrincipal currentUser) {
-        Interview interview = interviewService.updateInterview(id, interviewRequest, currentUser.getId());
-        return ResponseEntity.ok(InterviewDTO.fromInterview(interview));
+        try {
+            Interview interview = interviewService.updateInterview(id, interviewRequest, currentUser.getId());
+            return ResponseEntity.ok(InterviewDTO.fromInterview(interview));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(false, "Failed to update interview: " + e.getMessage()));
+        }
     }
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<InterviewDTO> updateInterviewStatus(@PathVariable Long id,
+    public ResponseEntity<?> updateInterviewStatus(@PathVariable Long id,
                                          @Valid @RequestBody StatusUpdateRequest statusRequest,
                                          @CurrentUser UserPrincipal currentUser) {
-        Interview interview = interviewService.updateInterviewStatus(id, statusRequest.getStatus(), currentUser.getId());
-        return ResponseEntity.ok(InterviewDTO.fromInterview(interview));
+        try {
+            Interview interview = interviewService.updateInterviewStatus(id, statusRequest.getStatus(), currentUser.getId());
+            return ResponseEntity.ok(InterviewDTO.fromInterview(interview));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(false, "Failed to update interview status: " + e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> deleteInterview(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
-        interviewService.deleteInterview(id, currentUser.getId());
-        return ResponseEntity.noContent().build();
+        try {
+            interviewService.deleteInterview(id, currentUser.getId());
+            return ResponseEntity.ok(new ApiResponse(true, "Interview deleted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(false, "Failed to delete interview: " + e.getMessage()));
+        }
     }
 }
