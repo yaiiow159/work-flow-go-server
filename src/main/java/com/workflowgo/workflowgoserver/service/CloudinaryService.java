@@ -23,10 +23,12 @@ public class CloudinaryService {
 
     public String uploadFile(MultipartFile file) {
         try {
+            String resourceType = determineResourceType(file.getContentType());
+            
             Map<?,?> uploadResult = cloudinary.uploader().upload(
                     file.getBytes(),
                     ObjectUtils.asMap(
-                            "resource_type", "auto"
+                            "resource_type", resourceType
                     )
             );
             return (String) uploadResult.get("secure_url");
@@ -35,18 +37,37 @@ public class CloudinaryService {
         }
     }
 
-    public void deleteFile(String fileUrl) {
+    public void deleteFile(String fileUrl, String contentType) {
         String publicId = extractPublicIdFromUrl(fileUrl);
         if (publicId == null) {
             throw new FileStorageException("Could not extract public ID from URL: " + fileUrl);
         }
+        
+        String resourceType = determineResourceType(contentType);
+        
         try {
             cloudinary.uploader().destroy(
                     publicId,
-                    ObjectUtils.asMap("resource_type", "image")
+                    ObjectUtils.asMap("resource_type", resourceType)
             );
         } catch (IOException e) {
             throw new FileStorageException("Failed to delete file from Cloudinary", e);
+        }
+    }
+
+    private String determineResourceType(String contentType) {
+        if (contentType == null) {
+            return "auto";
+        }
+        
+        if (contentType.startsWith("image/")) {
+            return "image";
+        } else if (contentType.startsWith("video/")) {
+            return "video";
+        } else if (contentType.startsWith("audio/")) {
+            return "video";
+        } else {
+            return "raw";
         }
     }
 
@@ -60,5 +81,4 @@ public class CloudinaryService {
         }
         return null;
     }
-
 }

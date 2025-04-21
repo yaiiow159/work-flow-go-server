@@ -33,7 +33,7 @@ public class Notification {
     private String message;
     
     @Column(nullable = false)
-    private String type;  // 'info', 'success', 'warning', 'error'
+    private String type;
     
     private boolean isRead = false;
     

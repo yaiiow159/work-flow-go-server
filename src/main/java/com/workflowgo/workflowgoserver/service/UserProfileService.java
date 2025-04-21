@@ -56,7 +56,7 @@ public class UserProfileService {
 
         if (user.getPhotoURL() != null && !user.getPhotoURL().isEmpty()) {
             try {
-                cloudinaryService.deleteFile(user.getPhotoURL());
+                cloudinaryService.deleteFile(user.getPhotoURL(), imageFile.getContentType());
             } catch (Exception e) {
                 log.error("Failed to delete old profile image: {}", e.getMessage());
             }

@@ -63,7 +63,7 @@ public class DocumentService {
         
         if (file != null && !file.isEmpty()) {
             if (document.getUrl() != null) {
-                cloudinaryService.deleteFile(document.getUrl());
+                cloudinaryService.deleteFile(document.getUrl(), document.getContentType());
             }
             
             String fileUrl = cloudinaryService.uploadFile(file);
@@ -79,7 +79,7 @@ public class DocumentService {
         Document document = getDocumentById(documentId, userId);
         
         if (document.getUrl() != null) {
-            cloudinaryService.deleteFile(document.getUrl());
+            cloudinaryService.deleteFile(document.getUrl(), document.getContentType());
         }
         
         documentRepository.delete(document);
