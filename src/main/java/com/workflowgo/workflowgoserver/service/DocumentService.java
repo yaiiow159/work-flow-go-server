@@ -84,15 +84,6 @@ public class DocumentService {
         
         documentRepository.delete(document);
     }
-
-    public Resource loadDocumentAsResource(Long documentId, Long userId) {
-        try {
-            Document document = getDocumentById(documentId, userId);
-            return new UrlResource(document.getUrl());
-        } catch (MalformedURLException ex) {
-            throw new ResourceNotFoundException("File", "id", documentId);
-        }
-    }
     
     public long getDocumentCount(Long userId) {
         return documentRepository.countByUserId(userId);
