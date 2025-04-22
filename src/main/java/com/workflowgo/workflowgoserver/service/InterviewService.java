@@ -1,17 +1,12 @@
 package com.workflowgo.workflowgoserver.service;
 
+import com.workflowgo.workflowgoserver.dto.ContactPersonDTO;
 import com.workflowgo.workflowgoserver.dto.InterviewDTO;
 import com.workflowgo.workflowgoserver.dto.QuestionDTO;
 import com.workflowgo.workflowgoserver.event.InterviewEvent;
 import com.workflowgo.workflowgoserver.exception.ResourceNotFoundException;
-import com.workflowgo.workflowgoserver.model.ContactPerson;
-import com.workflowgo.workflowgoserver.model.Document;
-import com.workflowgo.workflowgoserver.model.Interview;
-import com.workflowgo.workflowgoserver.model.Question;
-import com.workflowgo.workflowgoserver.model.User;
+import com.workflowgo.workflowgoserver.model.*;
 import com.workflowgo.workflowgoserver.model.enums.InterviewStatus;
-import com.workflowgo.workflowgoserver.model.enums.InterviewType;
-import com.workflowgo.workflowgoserver.payload.InterviewRequest;
 import com.workflowgo.workflowgoserver.repository.DocumentRepository;
 import com.workflowgo.workflowgoserver.repository.InterviewRepository;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
@@ -22,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -218,5 +212,43 @@ public class InterviewService {
         } else {
             interview.getDocuments().clear();
         }
+    }
+
+    public InterviewDTO convertToDTO(Interview interview) {
+        InterviewDTO interviewDTO = new InterviewDTO();
+        interviewDTO.setId(interview.getId());
+        interviewDTO.setCompanyName(interview.getCompanyName());
+        interviewDTO.setPosition(interview.getPosition());
+        interviewDTO.setDate(interview.getDate());
+        interviewDTO.setTime(interview.getTime());
+        interviewDTO.setLocation(interview.getLocation());
+        interviewDTO.setNotes(interview.getNotes());
+        interviewDTO.setType(interview.getType());
+        interviewDTO.setStatus(interview.getStatus());
+        interviewDTO.setRating(interview.getRating());
+        interviewDTO.setFeedback(interview.getFeedback());
+
+        if (interview.getContactPerson() != null) {
+            ContactPersonDTO contactPerson = new ContactPersonDTO();
+            contactPerson.setName(interview.getContactPerson().getName());
+            contactPerson.setPosition(interview.getContactPerson().getPosition());
+            contactPerson.setEmail(interview.getContactPerson().getEmail());
+            contactPerson.setPhone(interview.getContactPerson().getPhone());
+            interviewDTO.setContactPerson(contactPerson);
+        }
+
+        if (interview.getQuestions() != null) {
+            interviewDTO.setQuestions(interview.getQuestions().stream()
+                    .map(QuestionDTO::fromQuestion)
+                    .collect(Collectors.toList()));
+        }
+
+        if (interview.getDocuments() != null) {
+            interviewDTO.setDocumentIds(interview.getDocuments().stream()
+                    .map(Document::getId)
+                    .collect(Collectors.toList()));
+        }
+
+        return interviewDTO;
     }
 }

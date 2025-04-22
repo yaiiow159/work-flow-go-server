@@ -11,6 +11,7 @@ public class AuthDTO {
     private String photoURL;
     private String authProvider;
     private String token;
+    private UserPreferencesDTO preferences;
     
     public static AuthDTO fromUser(User user, String token) {
         if (user == null) {
@@ -24,6 +25,10 @@ public class AuthDTO {
         dto.setPhotoURL(user.getPhotoURL());
         dto.setAuthProvider(user.getProvider().toString());
         dto.setToken(token);
+
+        if (user.getPreferences() != null) {
+            dto.setPreferences(UserPreferencesDTO.fromUserPreferences(user.getPreferences()));
+        }
         return dto;
     }
 }

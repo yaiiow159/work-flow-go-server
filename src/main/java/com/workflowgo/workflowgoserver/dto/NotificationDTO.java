@@ -1,6 +1,5 @@
 package com.workflowgo.workflowgoserver.dto;
 
-import com.workflowgo.workflowgoserver.model.enums.RelatedEntityType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +12,7 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationDTO {
-    private Long id;
+    private String id;
     private String userId;
     private String title;
     private String message;
@@ -21,5 +20,5 @@ public class NotificationDTO {
     private boolean isRead;
     private ZonedDateTime createdAt;
     private String relatedEntityId;
-    private RelatedEntityType relatedEntityType;
+    private String relatedEntityType;
 }

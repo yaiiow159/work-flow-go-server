@@ -36,9 +36,4 @@ build/
 ### Document ###
 ./document
 *.env
-
-# 備份檔案
-*.java~
-*.xml~
-*~
-{{ ... }}
+.qodo

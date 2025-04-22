@@ -12,7 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -27,8 +27,8 @@ public class DocumentController {
 
     @GetMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<DocumentDTO>> getAllDocuments(@CurrentUser UserPrincipal currentUser) {
-        List<Document> documents = documentService.getAllDocumentsByUser(currentUser.getId());
+    public ResponseEntity<Set<DocumentDTO>> getAllDocuments(@CurrentUser UserPrincipal currentUser) {
+        Set<Document> documents = documentService.getAllDocumentsByUser(currentUser.getId());
         return ResponseEntity.ok(DocumentDTO.fromDocuments(documents));
     }
 

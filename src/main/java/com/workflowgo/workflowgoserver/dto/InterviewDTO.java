@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
@@ -23,6 +24,7 @@ public class InterviewDTO {
     private LocalTime time;
     private InterviewType type;
     private InterviewStatus status;
+    private Set<DocumentDTO> documents;
     private String location;
     private String notes;
     private ContactPersonDTO contactPerson;
@@ -44,7 +46,7 @@ public class InterviewDTO {
         dto.setStatus(interview.getStatus());
         dto.setLocation(interview.getLocation());
         dto.setNotes(interview.getNotes());
-        
+
         if (interview.getContactPerson() != null) {
             dto.setContactPerson(ContactPersonDTO.fromContactPerson(interview.getContactPerson()));
         }
@@ -64,6 +66,10 @@ public class InterviewDTO {
             dto.setDocumentIds(interview.getDocuments().stream()
                     .map(Document::getId)
                     .collect(Collectors.toList()));
+        }
+
+        if (interview.getDocuments() != null) {
+            dto.setDocuments(DocumentDTO.fromDocuments(interview.getDocuments()));
         }
         
         return dto;

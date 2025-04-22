@@ -85,7 +85,6 @@ public class NotificationService {
 
     private NotificationDTO convertToDTO(Notification notification) {
         return NotificationDTO.builder()
-                .id(notification.getId())
                 .userId(notification.getUser().getId().toString())
                 .title(notification.getTitle())
                 .message(notification.getMessage())
@@ -93,7 +92,7 @@ public class NotificationService {
                 .isRead(notification.isRead())
                 .createdAt(notification.getCreatedAt())
                 .relatedEntityId(notification.getRelatedEntityId())
-                .relatedEntityType(notification.getRelatedEntityType())
+                .relatedEntityType(notification.getRelatedEntityType().getValue())
                 .build();
     }
 }

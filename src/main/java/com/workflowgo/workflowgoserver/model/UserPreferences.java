@@ -12,4 +12,8 @@ public class UserPreferences {
     private String reminderTime = "1h";
     private String defaultView = "list";
     private boolean compactMode = false;
+
+    public boolean isNotificationsEnabled() {
+        return emailNotifications;
+    }
 }

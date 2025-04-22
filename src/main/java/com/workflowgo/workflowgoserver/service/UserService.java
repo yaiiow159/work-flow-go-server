@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -34,7 +35,7 @@ public class UserService {
     public UserService(UserRepository userRepository,
                        InterviewRepository interviewRepository,
                        DocumentRepository documentRepository
-                      ) {
+    ) {
         this.userRepository = userRepository;
         this.interviewRepository = interviewRepository;
         this.documentRepository = documentRepository;
@@ -120,78 +121,91 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public byte[] exportUserData(Long userId) {
-        try (
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ZipOutputStream zip = new ZipOutputStream(baos, StandardCharsets.UTF_8)
-        ) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ZipOutputStream zip = new ZipOutputStream(baos, StandardCharsets.UTF_8)) {
+
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-            zip.putNextEntry(new ZipEntry("user.csv"));
-            try (CSVPrinter csv = new CSVPrinter(
-                    new OutputStreamWriter(zip, StandardCharsets.UTF_8),
-                    CSVFormat.DEFAULT.withHeader("ID","Name","Email")
-            )) {
-                csv.printRecord(
-                        user.getId(),
-                        user.getName(),
-                        user.getEmail()
-                );
-                csv.flush();
-            }
-            zip.closeEntry();
+
+            writeCsvEntry(zip,
+                    "user.csv",
+                    new String[]{"ID", "Name", "Email"},
+                    csv -> csv.printRecord(user.getId(), user.getName(), user.getEmail())
+            );
 
             List<Interview> interviews = interviewRepository.findByUserId(
                     userId, Sort.by(Sort.Direction.DESC, "createdAt")
             );
-            zip.putNextEntry(new ZipEntry("interviews.csv"));
-            try (CSVPrinter csv = new CSVPrinter(
-                    new OutputStreamWriter(zip, StandardCharsets.UTF_8),
-                    CSVFormat.DEFAULT.withHeader(
-                            "InterviewID","Company","Position","Date","Time","Type","Status","Location","Rating"
-                    )
-            )) {
-                for (Interview it : interviews) {
-                    csv.printRecord(
-                            it.getId(),
-                            it.getCompanyName(),
-                            it.getPosition(),
-                            it.getDate(),
-                            it.getTime(),
-                            it.getType(),
-                            it.getStatus(),
-                            it.getLocation(),
-                            it.getRating()
-                    );
-                }
-                csv.flush();
-            }
-            zip.closeEntry();
+            writeCsvEntry(zip,
+                    "interviews.csv",
+                    new String[]{"InterviewID", "Company", "Position", "Date", "Time", "Type", "Status", "Location", "Rating"},
+                    csv -> {
+                        for (Interview it : interviews) {
+                            csv.printRecord(
+                                it.getId(),
+                                it.getCompanyName(),
+                                it.getPosition(),
+                                it.getDate(),
+                                it.getTime(),
+                                it.getType(),
+                                it.getStatus(),
+                                it.getLocation(),
+                                it.getRating()
+                            );
+                        }
+                    }
+            );
 
-            List<Document> docs = documentRepository.findByUserId(userId);
-            zip.putNextEntry(new ZipEntry("documents.csv"));
-            try (CSVPrinter csv = new CSVPrinter(
-                    new OutputStreamWriter(zip, StandardCharsets.UTF_8),
-                    CSVFormat.DEFAULT.withHeader("DocumentID","Name","Url","UploadedAt")
-            )) {
-                for (Document d : docs) {
-                    csv.printRecord(
-                            d.getId(),
-                            d.getName(),
-                            d.getUrl(),
-                            d.getCreatedAt()
-                    );
-                }
-                csv.flush();
-            }
-            zip.closeEntry();
+            Set<Document> docs = documentRepository.findByUserId(userId);
+            writeCsvEntry(zip,
+                    "documents.csv",
+                    new String[]{"DocumentID", "Name", "Url", "UploadedAt"},
+                    csv -> {
+                        for (Document d : docs) {
+                            csv.printRecord(
+                                d.getId(),
+                                d.getName(),
+                                d.getUrl(),
+                                d.getCreatedAt()
+                            );
+                        }
+                    }
+            );
 
             zip.finish();
             return baos.toByteArray();
-
         } catch (IOException ex) {
             throw new RuntimeException("Error exporting data to ZIP", ex);
         }
     }
+
+    private void writeCsvEntry(ZipOutputStream zip,
+                               String entryName,
+                               String[] header,
+                               CsvConsumer recordWriter) throws IOException {
+
+        zip.putNextEntry(new ZipEntry(entryName));
+        OutputStreamWriter osWriter = new OutputStreamWriter(
+                new UncloseableOutputStream(zip), StandardCharsets.UTF_8);
+        try (CSVPrinter csv = new CSVPrinter(osWriter, CSVFormat.DEFAULT.withHeader(header))) {
+            recordWriter.accept(csv);
+            csv.flush();
+        }
+        zip.closeEntry();
+    }
+
+    @FunctionalInterface
+    private interface CsvConsumer {
+        void accept(CSVPrinter csv) throws IOException;
+    }
+
+    private static class UncloseableOutputStream extends java.io.FilterOutputStream {
+        UncloseableOutputStream(java.io.OutputStream out) {
+            super(out);
+        }
+        @Override public void close() throws IOException { }
+    }
+
     public User resetUserSettings(Long userId) {
         User user = getUserById(userId);
         user.setPreferences(new UserPreferences());

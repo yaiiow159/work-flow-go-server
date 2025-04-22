@@ -2,12 +2,10 @@ package com.workflowgo.workflowgoserver.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.workflowgo.workflowgoserver.model.Document;
-import com.workflowgo.workflowgoserver.model.enums.DocumentType;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
@@ -42,9 +40,9 @@ public class DocumentDTO {
         return dto;
     }
     
-    public static List<DocumentDTO> fromDocuments(List<Document> documents) {
+    public static Set<DocumentDTO> fromDocuments(Set<Document> documents) {
         return documents.stream()
                 .map(DocumentDTO::fromDocument)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 }

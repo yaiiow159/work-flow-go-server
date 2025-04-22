@@ -69,11 +69,6 @@ management:
       probes:
         enabled: true
 
-# mail server
-sendgrid:
-  api-key: ${SENDGRID_API_KEY:}
-  from:    ${SENDGRID_FROM:jhanghongwun0728@gmail.com}
-
 app:
   auth:
     tokenSecret: ${JWT_SECRET:bd04b7c89bfd96a0f14a997f58f2246c37883f3825dd1a3f3d636f9fb0d386a0}
@@ -93,3 +88,4 @@ app:
 
       If you did not request this code, please ignore this email.'
     verificationCodeExpirationMinutes: ${EMAIL_VERIFICATION_EXPIRATION:30}
+

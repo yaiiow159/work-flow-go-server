@@ -7,13 +7,10 @@ import com.workflowgo.workflowgoserver.model.enums.DocumentType;
 import com.workflowgo.workflowgoserver.repository.DocumentRepository;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.net.MalformedURLException;
-import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -31,7 +28,7 @@ public class DocumentService {
         this.cloudinaryService = cloudinaryService;
     }
 
-    public List<Document> getAllDocumentsByUser(Long userId) {
+    public Set<Document> getAllDocumentsByUser(Long userId) {
         return documentRepository.findByUserId(userId);
     }
 
