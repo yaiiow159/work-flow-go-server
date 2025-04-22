@@ -57,30 +57,6 @@ public class UserService {
             user.setEmail(userInfoDTO.getEmail());
         }
 
-        if (userInfoDTO.getBio() != null) {
-            user.setBio(userInfoDTO.getBio());
-        }
-
-        if (userInfoDTO.getPhone() != null) {
-            user.setPhone(userInfoDTO.getPhone());
-        }
-
-        if (userInfoDTO.getLocation() != null) {
-            user.setLocation(userInfoDTO.getLocation());
-        }
-
-        if (userInfoDTO.getCompany() != null) {
-            user.setCompany(userInfoDTO.getCompany());
-        }
-
-        if (userInfoDTO.getPosition() != null) {
-            user.setPosition(userInfoDTO.getPosition());
-        }
-
-        if (userInfoDTO.getPhotoURL() != null) {
-            user.setPhotoURL(userInfoDTO.getPhotoURL());
-        }
-
         if (userInfoDTO.getPreferences() != null) {
             if (userInfoDTO.getPreferences().getTheme() != null) {
                 user.getPreferences().setDarkMode(

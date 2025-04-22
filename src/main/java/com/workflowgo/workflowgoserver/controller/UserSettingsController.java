@@ -8,9 +8,17 @@ import com.workflowgo.workflowgoserver.security.CurrentUser;
 import com.workflowgo.workflowgoserver.security.UserPrincipal;
 import com.workflowgo.workflowgoserver.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping("/user")
@@ -41,13 +49,15 @@ public class UserSettingsController {
 
     @GetMapping("/export")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> exportUserData(@CurrentUser UserPrincipal currentUser) {
-        byte[] data = userService.exportUserData(currentUser.getId());
-        
+    public ResponseEntity<ByteArrayResource> exportUserDataZip(@CurrentUser UserPrincipal currentUser) {
+        byte[] zipBytes = userService.exportUserData(currentUser.getId());
+        ByteArrayResource resource = new ByteArrayResource(zipBytes);
+
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=\"user-data.json\"")
-                .header("Content-Type", "application/json")
-                .body(data);
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"user-data.zip\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(zipBytes.length)
+                .body(resource);
     }
 
     @PostMapping("/settings/reset")

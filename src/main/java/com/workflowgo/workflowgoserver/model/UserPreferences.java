@@ -9,7 +9,7 @@ public class UserPreferences {
     private boolean darkMode = false;
     private String primaryColor = "#4f46e5";
     private boolean emailNotifications = true;
-    private String reminderTime = "1h";
+    private String reminderTime = "1hour";
     private String defaultView = "list";
     private boolean compactMode = false;
 
