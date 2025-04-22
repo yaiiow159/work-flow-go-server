@@ -211,13 +211,10 @@ public class InterviewService {
         }
 
         if (request.getDocumentIds() != null && !request.getDocumentIds().isEmpty()) {
-            Set<Document> documents = new HashSet<>();
-            for (Long documentId : request.getDocumentIds()) {
-                Document document = documentRepository.findByIdAndUserId(documentId, userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Document", "id", documentId));
-                documents.add(document);
-            }
-            interview.setDocuments(documents);
+            Set<Document> docs = new HashSet<>(
+                    documentRepository.findAllById(request.getDocumentIds())
+            );
+            interview.setDocuments(docs);
         } else {
             interview.getDocuments().clear();
         }
