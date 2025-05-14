@@ -1,35 +1,41 @@
 # WorkFlowGo Interview Tracking System
 
+<div align="center">
+
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.10-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
-[![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://www.docker.com/)
+[![Cloudinary](https://img.shields.io/badge/Cloudinary-Integrated-6c69c6.svg)](https://cloudinary.com/)
+[![Docker](https://img.shields.io/badge/Docker-Supported-2496ED.svg)](https://www.docker.com/)
+[![JWT](https://img.shields.io/badge/JWT-Authentication-black.svg)](https://jwt.io/)
+
+</div>
 
 WorkFlowGo is a comprehensive interview tracking system designed to help job seekers manage their interview process efficiently. This repository contains the backend server implementation built with Spring Boot.
 
-## Features
+## 🚀 Features
 
-- **Interview Management**: Create, update, and track interviews with detailed information
-- **Document Storage**: Upload and manage documents like resumes and cover letters using Cloudinary
-- **Email Notifications**: Receive timely reminders and updates about your interviews
-- **Statistics Dashboard**: Get insights into your interview process with comprehensive statistics
-- **User Settings**: Customize your experience with personalized settings
-- **Security**: OAuth2 and JWT authentication to protect your data
-- **Caching**: Improved performance with intelligent caching
-- **Rate Limiting**: Protection against API abuse
-- **Request Logging**: Comprehensive logging for debugging and monitoring
-- **Docker Support**: Easy deployment with Docker and Docker Compose
-- **Google OAuth2 Authentication**: Secure authentication with Google OAuth2
-- **JWT Token-Based Authentication**: Token-based authentication for secure API access
-- **RESTful API**: Well-designed API following REST principles
+- **📅 Interview Management**: Create, update, and track interviews with detailed information
+- **📄 Document Storage**: Hybrid storage solution using PostgreSQL LOB and Cloudinary for efficient access
+- **📧 Email Notifications**: Receive timely reminders and updates about your interviews
+- **📊 Statistics Dashboard**: Get insights into your interview process with comprehensive statistics
+- **⚙️ User Settings**: Customize your experience with personalized settings
+- **🔒 Security**: OAuth2 and JWT authentication to protect your data
+- **⚡ Real-time Updates**: WebSocket integration for instant notifications
+- **🔄 Caching**: Improved performance with intelligent caching
+- **🛡️ Rate Limiting**: Protection against API abuse
+- **📝 Request Logging**: Comprehensive logging for debugging and monitoring
+- **🐳 Docker Support**: Easy deployment with Docker and Docker Compose
 
-## Technology Stack
+## 🛠️ Technology Stack
 
+### Backend
 - **Java 21**: Core programming language
 - **Spring Boot 3.3.10**: Application framework
 - **Spring Data JPA**: Data access layer
-- **PostgreSQL 16**: Relational database for data persistence
-- **Cloudinary**: Cloud-based document storage
+- **PostgreSQL 16**: Relational database with LOB support for data persistence
+- **Cloudinary**: Cloud-based image and document storage
+- **WebSocket**: Real-time communication
 - **JavaMail API**: Email service integration
 - **Swagger/OpenAPI**: API documentation
 - **Spring Security with OAuth2**: Authentication and authorization
@@ -38,10 +44,36 @@ WorkFlowGo is a comprehensive interview tracking system designed to help job see
 - **Docker & Docker Compose**: Containerization and deployment
 - **Maven**: Dependency management and build tool
 
-## Code Quality & Best Practices
+### Storage Architecture
+- **Hybrid Storage Solution**:
+  - **PostgreSQL LOB**: Efficient storage of binary data (profile images, documents) using Large Objects
+  - **Cloudinary**: Fast content delivery and image processing for web display
+  - **Transaction Management**: Proper transaction handling for LOB access
 
-- **Constructor Injection**: Dependency injection is implemented using constructor injection instead of field injection for better testability and immutability
-- **Lombok**: Reduces boilerplate code with annotations like @Data, @Getter, @Setter
+## 🧩 Architecture
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │
+│  Client/Browser │────▶│  Spring Boot    │────▶│  PostgreSQL     │
+│                 │     │  Application    │     │  Database       │
+│                 │◀────│                 │◀────│                 │
+└─────────────────┘     └────────┬────────┘     └─────────────────┘
+                                 │
+                                 ▼
+                        ┌─────────────────┐
+                        │                 │
+                        │   Cloudinary    │
+                        │   Storage       │
+                        │                 │
+                        └─────────────────┘
+```
+
+## 💻 Code Quality & Best Practices
+
+- **Constructor Injection**: Dependency injection using constructor injection for better testability
+- **Transaction Management**: Proper handling of database transactions, especially for LOB data
+- **Lombok**: Reduces boilerplate code with annotations
 - **Exception Handling**: Centralized exception handling with custom exceptions
 - **DTO Pattern**: Data Transfer Objects for clean API contracts
 - **Repository Pattern**: Separation of data access logic
@@ -51,7 +83,7 @@ WorkFlowGo is a comprehensive interview tracking system designed to help job see
 - **Type Converters**: Custom type converters for complex data types
 - **Validation**: Input validation using Bean Validation API
 
-## Getting Started
+## 🚦 Getting Started
 
 ### Prerequisites
 
@@ -92,11 +124,11 @@ WorkFlowGo is a comprehensive interview tracking system designed to help job see
    mvn spring-boot:run
    ```
 
-The server will start on port 8001 by default. The API will be available at `http://localhost:8001/api`.
+The server will start on port 8081 by default. The API will be available at `http://localhost:8081/api`.
 
-### Docker Deployment
+### 🐳 Docker Deployment
 
-The application supports Docker deployment for easy setup and deployment:
+The application supports Docker deployment for easy setup:
 
 #### Using Docker Compose (Recommended)
 
@@ -128,7 +160,7 @@ The application supports Docker deployment for easy setup and deployment:
      workflowgo-server
    ```
 
-### Deployment on Render
+### ☁️ Deployment on Render
 
 This application is configured for deployment on Render using Docker. Follow these steps to deploy:
 
@@ -163,16 +195,16 @@ This application is configured for deployment on Render using Docker. Follow the
 
 The application will be available at `https://your-render-service-name.onrender.com/api`.
 
-## API Documentation
+## 📚 API Documentation
 
 Once the application is running, you can access the Swagger UI at:
 ```
-http://localhost:8001/api/swagger-ui.html
+http://localhost:8081/api/swagger-ui.html
 ```
 
 This provides a comprehensive documentation of all available endpoints.
 
-## Configuration
+## ⚙️ Configuration
 
 ### Google OAuth2 Configuration
 
@@ -183,18 +215,11 @@ GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 ```
 
-You can obtain these credentials by creating a project in the [Google Developer Console](https://console.developers.google.com/):
-
-1. Create a new project
-2. Navigate to "Credentials" and create OAuth client ID
-3. Configure the OAuth consent screen
-4. Add authorized redirect URIs:
-   - `http://localhost:8081/api/oauth2/callback/google` (for development)
-   - `https://your-production-domain.com/api/oauth2/callback/google` (for production)
+You can obtain these credentials by creating a project in the [Google Developer Console](https://console.developers.google.com/).
 
 ### Cloudinary Configuration
 
-For document storage, you need to configure Cloudinary:
+For document and image storage, you need to configure Cloudinary:
 
 ```
 CLOUDINARY_CLOUD_NAME=your-cloud-name
@@ -230,7 +255,7 @@ JWT_EXPIRATION=864000000
 
 The JWT_EXPIRATION is in milliseconds (default: 10 days).
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 src/main/java/com/workflowgo/workflowgoserver/
@@ -245,7 +270,7 @@ src/main/java/com/workflowgo/workflowgoserver/
 └── WorkflowGoServerApplication.java  # Main application class
 ```
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -255,14 +280,14 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contact
+## 📧 Contact
 
 For any questions or suggestions, please open an issue in the GitHub repository.
 
 ---
 
-Last updated: April 21, 2025
+Last updated: May 14, 2025
