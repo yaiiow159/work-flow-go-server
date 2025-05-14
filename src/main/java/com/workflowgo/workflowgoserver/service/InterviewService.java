@@ -216,6 +216,7 @@ public class InterviewService {
         }
     }
 
+    @Transactional(readOnly = true)
     public InterviewDTO convertToDTO(Interview interview) {
         InterviewDTO interviewDTO = new InterviewDTO();
         interviewDTO.setId(interview.getId());
