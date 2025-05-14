@@ -6,10 +6,10 @@ import com.workflowgo.workflowgoserver.model.User;
 import com.workflowgo.workflowgoserver.model.UserPreferences;
 import com.workflowgo.workflowgoserver.repository.InterviewRepository;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -39,6 +39,7 @@ public class InterviewReminderService {
     }
 
     @Scheduled(fixedRate = 60_000)
+    @Transactional(readOnly = true)
     public void checkUpcomingInterviews() {
         log.debug("Checking for upcoming interviews...");
         List<User> users = userRepository.findAll();
@@ -75,6 +76,7 @@ public class InterviewReminderService {
     }
 
     @Scheduled(fixedRate = 3_600_000)
+    @Transactional(readOnly = true)
     public void cleanupRemindedInterviews() {
         log.debug("Cleaning up expired reminders...");
         List<User> users = userRepository.findAll();
