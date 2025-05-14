@@ -5,6 +5,7 @@ import com.workflowgo.workflowgoserver.dto.UserProfileRequest;
 import com.workflowgo.workflowgoserver.exception.ResourceNotFoundException;
 import com.workflowgo.workflowgoserver.model.User;
 import com.workflowgo.workflowgoserver.repository.UserRepository;
+import com.workflowgo.workflowgoserver.service.CloudinaryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class UserProfileService {
         this.cloudinaryService = cloudinaryService;
     }
 
+    @Transactional
     public UserProfileDTO getUserProfile(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
@@ -54,6 +56,8 @@ public class UserProfileService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
+        user.setPhotoContent(imageFile.getBytes());
+        
         if (user.getPhotoURL() != null && !user.getPhotoURL().isEmpty()) {
             try {
                 cloudinaryService.deleteFile(user.getPhotoURL(), imageFile.getContentType());
@@ -63,11 +67,18 @@ public class UserProfileService {
         }
 
         String imageUrl = cloudinaryService.uploadFile(imageFile);
-
         user.setPhotoURL(imageUrl);
         userRepository.save(user);
 
         return imageUrl;
+    }
+    
+    @Transactional
+    public byte[] getProfileImage(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        
+        return user.getPhotoContent();
     }
 
     private UserProfileDTO convertToUserProfileDTO(User user) {
@@ -83,5 +94,4 @@ public class UserProfileService {
         userProfileDTO.setPhotoURL(user.getPhotoURL());
         return userProfileDTO;
     }
-
 }

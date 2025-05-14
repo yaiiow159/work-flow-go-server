@@ -31,6 +31,12 @@ public class User {
     
     private String photoURL;
     
+    @Lob
+    @Column(name = "photo_content", columnDefinition = "oid")
+    @Basic(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private byte[] photoContent;
+    
     @Column(nullable = false)
     private Boolean emailVerified = false;
     

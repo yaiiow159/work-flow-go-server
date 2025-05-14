@@ -41,6 +41,7 @@ public class InterviewService {
         this.eventPublisher = eventPublisher;
     }
 
+    @Transactional(readOnly = true)
     public List<Interview> getInterviews(Long userId, String status, LocalDate from, LocalDate to,
                                          String company, String sort, String order) {
         
@@ -78,6 +79,7 @@ public class InterviewService {
         return savedInterview;
     }
 
+    @Transactional(readOnly = true)
     public Interview getInterviewById(Long interviewId, Long userId) {
         return interviewRepository.findByIdAndUserId(interviewId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Interview", "id", interviewId));

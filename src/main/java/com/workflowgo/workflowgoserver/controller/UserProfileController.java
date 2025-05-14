@@ -7,8 +7,12 @@ import com.workflowgo.workflowgoserver.security.UserPrincipal;
 import com.workflowgo.workflowgoserver.service.AuthService;
 import com.workflowgo.workflowgoserver.service.UserProfileService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,7 +25,7 @@ public class UserProfileController {
     private final AuthService authService;
     private final UserProfileService userProfileService;
 
-    public UserProfileController( AuthService authService, UserProfileService userProfileService) {
+    public UserProfileController(AuthService authService, UserProfileService userProfileService) {
         this.authService = authService;
         this.userProfileService = userProfileService;
     }
@@ -48,17 +52,31 @@ public class UserProfileController {
             @CurrentUser UserPrincipal currentUser) throws IOException {
         return ResponseEntity.ok(userProfileService.updateProfileImage(currentUser.getId(), file));
     }
-    
+
+    @GetMapping("/profile-image/{userId}")
+    @Transactional
+    public ResponseEntity<byte[]> getProfileImage(@PathVariable Long userId) {
+        byte[] imageBytes = userProfileService.getProfileImage(userId);
+        if (imageBytes == null || imageBytes.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+
+        return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+    }
+
     @PostMapping("/change-password")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> changePassword(
             @CurrentUser UserPrincipal userPrincipal,
             @Valid @RequestBody PasswordChangeRequest passwordChangeRequest) {
         authService.changePassword(
-            userPrincipal.getId(), 
-            passwordChangeRequest.getCurrentPassword(), 
-            passwordChangeRequest.getNewPassword(), 
-            passwordChangeRequest.getConfirmPassword()
+                userPrincipal.getId(),
+                passwordChangeRequest.getCurrentPassword(),
+                passwordChangeRequest.getNewPassword(),
+                passwordChangeRequest.getConfirmPassword()
         );
         return ResponseEntity.ok("Password changed successfully");
     }

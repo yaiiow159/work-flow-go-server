@@ -1,6 +1,7 @@
 package com.workflowgo.workflowgoserver.service;
 
 import com.workflowgo.workflowgoserver.config.AppProperties;
+import com.workflowgo.workflowgoserver.model.Document;
 import com.workflowgo.workflowgoserver.model.Interview;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
@@ -65,6 +67,21 @@ public class EmailService {
         }
     }
 
+    @Async("taskExecutor")
+    public void sendDocumentNotification(String to, Document document, String actionType) {
+        try {
+            log.info("Preparing to send document notification to: {}", to);
+            String subject = "WorkflowGo - Document " + capitalize(actionType);
+            String textBody = createDocumentTextEmail(document, actionType);
+            String htmlBody = createDocumentHtmlEmail(document, actionType);
+            
+            sendEmail(to, subject, textBody, htmlBody);
+            log.info("Document notification sent successfully to: {}", to);
+        } catch (Exception e) {
+            log.error("Failed to send document notification to: {}", to, e);
+        }
+    }
+    
     private String createInterviewUpdateTextEmail(Interview interview, String changeType) {
         StringBuilder sb = new StringBuilder();
         sb.append("WorkflowGo - Interview Update\n\n");
@@ -198,6 +215,114 @@ public class EmailService {
           .append("</html>");
         
         return sb.toString();
+    }
+
+    private String createDocumentTextEmail(Document document, String actionType) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("WorkflowGo - Document Notification\n\n");
+        sb.append("Hello,\n\n");
+        
+        switch (actionType) {
+            case "uploaded":
+                sb.append("A new document has been uploaded to your WorkflowGo account.\n\n");
+                break;
+            case "updated":
+                sb.append("A document in your WorkflowGo account has been updated.\n\n");
+                break;
+            case "deleted":
+                sb.append("A document in your WorkflowGo account has been deleted.\n\n");
+                break;
+        }
+        
+        if (!actionType.equals("deleted")) {
+            sb.append("Document Details:\n");
+            sb.append("Name: ").append(document.getName()).append("\n");
+            if (document.getType() != null) {
+                sb.append("Type: ").append(document.getType()).append("\n");
+            }
+            sb.append("Size: ").append(formatFileSize(document.getSize())).append("\n");
+            sb.append("Uploaded: ").append(document.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))).append("\n");
+        }
+        
+        sb.append("\nYou can view all your documents by logging into your WorkflowGo account.\n\n");
+        sb.append("This is an automated message, please do not reply to this email.\n");
+        sb.append("© ").append(java.time.Year.now().getValue()).append(" WorkflowGo. All rights reserved.");
+        
+        return sb.toString();
+    }
+    
+    private String createDocumentHtmlEmail(Document document, String actionType) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<!DOCTYPE html>")
+          .append("<html>")
+          .append("<head>")
+          .append("<meta charset=\"UTF-8\">")
+          .append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">")
+          .append("<title>Document Notification</title>")
+          .append("<style>")
+          .append("body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }")
+          .append(".container { border: 1px solid #ddd; border-radius: 5px; padding: 20px; }")
+          .append(".header { text-align: center; padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 20px; }")
+          .append(".details { background-color: #f9f9f9; padding: 15px; border-radius: 4px; margin: 15px 0; }")
+          .append(".footer { font-size: 12px; color: #777; text-align: center; margin-top: 30px; padding-top: 10px; border-top: 1px solid #eee; }")
+          .append("</style>")
+          .append("</head>")
+          .append("<body>")
+          .append("<div class=\"container\">")
+          .append("<div class=\"header\"><h2>WorkflowGo Document Notification</h2></div>")
+          .append("<p>Hello,</p>");
+        
+        switch (actionType) {
+            case "uploaded":
+                sb.append("<p>A new document has been uploaded to your WorkflowGo account.</p>");
+                break;
+            case "updated":
+                sb.append("<p>A document in your WorkflowGo account has been updated.</p>");
+                break;
+            case "deleted":
+                sb.append("<p>A document in your WorkflowGo account has been deleted.</p>");
+                break;
+        }
+        
+        if (!actionType.equals("deleted")) {
+            sb.append("<div class=\"details\">")
+              .append("<h3>Document Details</h3>")
+              .append("<p><strong>Name:</strong> ").append(document.getName()).append("</p>");
+              
+            if (document.getType() != null) {
+                sb.append("<p><strong>Type:</strong> ").append(document.getType()).append("</p>");
+            }
+            
+            sb.append("<p><strong>Size:</strong> ").append(formatFileSize(document.getSize())).append("</p>")
+              .append("<p><strong>Uploaded:</strong> ").append(document.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))).append("</p>")
+              .append("</div>");
+        }
+        
+        sb.append("<p>You can view all your documents by logging into your WorkflowGo account.</p>")
+          .append("<div class=\"footer\">")
+          .append("<p>This is an automated message, please do not reply to this email.</p>")
+          .append("<p>&copy; ").append(java.time.Year.now().getValue()).append(" WorkflowGo. All rights reserved.</p>")
+          .append("</div>")
+          .append("</div>")
+          .append("</body>")
+          .append("</html>");
+        
+        return sb.toString();
+    }
+    
+    private String formatFileSize(Long size) {
+        if (size == null) return "Unknown";
+        
+        final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    }
+    
+    private String capitalize(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
     private String createHtmlVerificationEmail(String code, int expirationMinutes) {

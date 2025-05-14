@@ -30,6 +30,17 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_USER:examyou076@gmail.com}
+    password: ${EMAIL_PASS:bclr hmql svwx nmwd}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   security:
     oauth2:
       client:
@@ -88,4 +99,3 @@ app:
 
       If you did not request this code, please ignore this email.'
     verificationCodeExpirationMinutes: ${EMAIL_VERIFICATION_EXPIRATION:30}
-

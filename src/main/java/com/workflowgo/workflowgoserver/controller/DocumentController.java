@@ -7,8 +7,12 @@ import com.workflowgo.workflowgoserver.security.CurrentUser;
 import com.workflowgo.workflowgoserver.security.UserPrincipal;
 import com.workflowgo.workflowgoserver.service.DocumentService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -56,8 +60,39 @@ public class DocumentController {
     @GetMapping("/{id}/download")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> downloadDocument(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
-        Document document = documentService.getDocumentById(id, currentUser.getId());
-        return ResponseEntity.ok(document.getUrl());
+        try {
+            Document document = documentService.getDocumentById(id, currentUser.getId());
+            byte[] fileContent = documentService.getDocumentContent(id, currentUser.getId());
+            
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(document.getContentType()))
+                    .contentLength(fileContent.length)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getName() + "\"")
+                    .body(fileContent);
+        } catch (Exception e) {
+            log.error("Error downloading document: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse(false, "Error downloading document: " + e.getMessage()));
+        }
+    }
+    
+    @GetMapping("/{id}/file")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getDocumentFile(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
+        try {
+            Document document = documentService.getDocumentById(id, currentUser.getId());
+            byte[] fileContent = documentService.getDocumentContent(id, currentUser.getId());
+            
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(document.getContentType()))
+                    .contentLength(fileContent.length)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + document.getName() + "\"")
+                    .body(fileContent);
+        } catch (Exception e) {
+            log.error("Error retrieving document file: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse(false, "Error retrieving document: " + e.getMessage()));
+        }
     }
     
     @DeleteMapping("/{id}")
@@ -90,6 +125,11 @@ public class DocumentController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> viewDocument(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
         Document document = documentService.getDocumentById(id, currentUser.getId());
-        return ResponseEntity.ok(document.getUrl());
+        byte[] fileContent = documentService.getDocumentContent(id, currentUser.getId());
+        
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(document.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + document.getName() + "\"")
+                .body(fileContent);
     }
 }

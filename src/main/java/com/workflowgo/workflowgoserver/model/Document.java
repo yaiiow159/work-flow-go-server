@@ -5,6 +5,7 @@ import com.workflowgo.workflowgoserver.model.enums.DocumentType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalDateTime;
@@ -37,6 +38,12 @@ public class Document {
     private String contentType;
     
     private Long size;
+    
+    @Lob
+    @Column(name = "content", columnDefinition = "oid")
+    @Basic(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private byte[] content;
     
     @CreationTimestamp
     private ZonedDateTime createdAt;
