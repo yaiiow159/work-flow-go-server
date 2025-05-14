@@ -7,6 +7,7 @@ import com.workflowgo.workflowgoserver.payload.StatisticItem;
 import com.workflowgo.workflowgoserver.repository.InterviewRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -26,6 +27,7 @@ public class StatisticsService {
         this.interviewRepository = interviewRepository;
     }
 
+    @Transactional(readOnly = true)
     public InterviewStatistics getInterviewStatistics(Long userId, LocalDate from, LocalDate to) {
         List<Interview> interviews = interviewRepository.findByUserId(userId, Sort.by(Sort.Direction.ASC, "date"));
         
