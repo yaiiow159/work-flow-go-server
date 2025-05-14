@@ -10,6 +10,7 @@ import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +28,11 @@ public class EmailService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
-    public EmailService(AppProperties appProperties) {
+    private final JavaMailSender javaMailSender;
+
+    public EmailService(AppProperties appProperties, JavaMailSender javaMailSender) {
         this.appProperties = appProperties;
+        this.javaMailSender = javaMailSender;
     }
 
     @Async("taskExecutor")
@@ -384,10 +388,8 @@ public class EmailService {
         
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         email.writeTo(buffer);
-        byte[] rawMessageBytes = buffer.toByteArray();
-        String encodedMessage = java.util.Base64.getEncoder().encodeToString(rawMessageBytes);
-        String encodedEmail = java.util.Base64.getEncoder().encodeToString(rawMessageBytes);
 
-        log.debug("Sending email to: {}", to);
+        log.debug("Sending email to recipient: {}", to);
+        javaMailSender.send(email);
     }
 }
